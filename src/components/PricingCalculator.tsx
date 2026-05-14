@@ -137,7 +137,7 @@ export function PricingCalculator() {
         </div>
 
         <a
-          href={`mailto:hello@sh42.me?subject=project inquiry: ${projectType} (${pages} pages)&body=hi, i'm interested in a ${projectType} project with ${pages} pages and features: ${features.join(", ")}.`}
+          href={`mailto:devhimanshuhc@gmail.com?subject=project inquiry: ${projectType} (${pages} pages)&body=hi, i'm interested in a ${projectType} project with ${pages} pages and features: ${features.join(", ")}.`}
           className="flex items-center justify-center bg-transparent hover:bg-primary hover:text-primary-foreground text-foreground border-t md:border-t-0 md:border-l border-input transition-all ease-out duration-300 group relative overflow-hidden py-8 md:py-0"
         >
           <span className="font-zilla-slab text-2xl lg:text-3xl italic pr-2 z-10 group-hover:pr-4 transition-all">

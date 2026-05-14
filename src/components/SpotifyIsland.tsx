@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Music, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 import type { LucideIcon } from "lucide-react"; // Import LucideIcon type
 import { cn } from "@/lib/utils";
@@ -28,22 +28,7 @@ const Icon = ({ icon: IconComponent, ...props }: IconProps) => (
   </div>
 );
 
-// Spotify icon using SVG path for brand consistency
-const SpotifyIcon = () => (
-  <Icon
-    icon={() => (
-      <svg
-        role="img"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-      >
-        <title>Spotify</title>
-        <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm4.193 14.813a.5.5 0 01-.659.253c-1.637-.932-3.832-1.143-6.448-.63a.5.5 0 01-.552-.446.5.5 0 01.446-.552c2.888-.566 5.348-.313 7.21.72a.5.5 0 01.253.658zm.85-2.22a.625.625 0 01-.825.313c-1.88-.93-4.293-1.22-7.073-.664a.625.625 0 01-.69-.608.625.625 0 01.608-.69c3.073-.612 5.748-.273 7.855.78a.625.625 0 01.313.824zm.913-2.353c-2.25-.99-5.013-1.26-8.25-.69a.75.75 0 01-.813-.734.75.75 0 01.734-.813c3.6-.625 6.653-.313 9.15.813a.75.75 0 01.375.937.75.75 0 01-.937.375z" />
-      </svg>
-    )}
-  />
-);
+const SPOTIFY_TRACK_DISPLAY_LIMIT = 15;
 
 // --- Main Component ---
 
@@ -145,7 +130,9 @@ const SpotifyActivity = () => {
           externalUrl: `https://open.spotify.com/track/${item.id}`, // Spotify track URL
           playedAt: item.playedAt,
         }));
-        setTracks(fetchedTracks.slice(0, 5)); // Ensure only top 5 are displayed
+        setTracks(
+          fetchedTracks.slice(0, SPOTIFY_TRACK_DISPLAY_LIMIT),
+        );
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -158,9 +145,9 @@ const SpotifyActivity = () => {
   }, []);
 
   return (
-    <div className="flex flex-col bg-background bg-texture">
+    <div className="flex flex-col bg-background bg-texture min-h-0 pb-3">
       {loading &&
-        Array.from({ length: 5 }).map((_, i) => (
+        Array.from({ length: SPOTIFY_TRACK_DISPLAY_LIMIT }).map((_, i) => (
           <div
             key={i}
             className="flex items-center gap-3 mb-3 h-[51.24px] md:h-[62.72px] last:mb-0 px-4"

@@ -1,0 +1,276 @@
+{
+  "_meta": {
+    "description": "Structured profile synthesized from this portfolio site's source files (not authoritative identity documents)",
+    "sourceRepository": {
+      "packageName": "portfolio",
+      "version": "0.1.0"
+    },
+    "primarySources": [
+      "src/components/sections/HeroSection.tsx",
+      "src/components/sections/AboutSection.tsx",
+      "src/components/sections/SkillsSection.tsx",
+      "src/components/sections/ExperienceSection.tsx",
+      "src/components/sections/LocationSection.tsx",
+      "src/components/sections/ProjectsSection.tsx (via src/data/projects.ts)",
+      "src/components/sections/PhotographySection.tsx",
+      "src/components/PhotoCarousel.tsx",
+      "src/components/sections/ContactSection.tsx",
+      "src/data/contact.ts",
+      "src/data/skills.ts",
+      "src/data/projects.ts",
+      "src/app/layout.tsx",
+      "src/components/Footer.tsx",
+      "src/components/Navbar.tsx",
+      "src/components/InteractiveMap.tsx"
+    ]
+  },
+  "identity": {
+    "fullName": "Himanshu Chauhan",
+    "preferredFirstName": "Himanshu",
+    "githubUsername": "devhimanshuhc",
+    "roles": [
+      "Full-stack web and app developer",
+      "Full Stack Developer & 3D Enthusiast"
+    ]
+  },
+  "siteMetadata": {
+    "title": "Portfolio",
+    "description": "Full Stack Developer & 3D Enthusiast",
+    "themeColor": "#000000",
+    "fontFamily": "Space Mono (Google Fonts)"
+  },
+  "taglines": {
+    "headlinePrimary": "I build things for the web and mobile",
+    "heroSubtitle": "I'm a full-stack web and app developer with a passion for 3D and design animation, creating immersive digital experiences that blend technology and creativity.",
+    "experienceSectionSubtitle": "Building impactful solutions across web, mobile, and blockchain ecosystems",
+    "skillsSectionTitle": "Technical Arsenal",
+    "photographySectionTagline": "Where code meets creativity in capturing life's moments",
+    "locationSectionTitle": "Where Magic Happens"
+  },
+  "about": {
+    "paragraphs": [
+      "Hello! I'm Himanshu, a passionate Full Stack Web & App Developer originally from Dehradun, the picturesque capital of Uttarakhand nestled in the Himalayan foothills. Currently pursuing my graduation in Nagpur, Maharashtra, where I'm turning my tech dreams into reality.",
+      "Coming from the \"Queen of Hills\" to the \"Orange City,\" my journey reflects my adaptability and drive. I focus on developing elegant solutions that balance form and function, bringing together the serenity of my hometown and the vibrancy of my university city in every project I create."
+    ]
+  },
+  "location": {
+    "hometown": "Dehradun, Uttarakhand, India",
+    "hometownNickname": "Queen of Hills",
+    "educationCity": {
+      "name": "Nagpur, Maharashtra",
+      "nickname": "Orange City",
+      "context": "Currently pursuing graduation (as stated on site)"
+    },
+    "portfolioMapCenter": {
+      "latitude": 30.3165,
+      "longitude": 78.0322,
+      "note": "Used for InteractiveMap and OpenWeather; corresponds to Dehradun area in app code"
+    },
+    "locationSectionCopy": "Currently crafting digital experiences from the Dehradun, India.",
+    "contactBasedIn": "Dehradun, Uttarakhand, India",
+    "availability": "Freelance, Full-time opportunities"
+  },
+  "experience": [
+    {
+      "role": "Software Developer",
+      "company": "Heizen",
+      "period": "Aug 2025 – Present",
+      "location": "San Francisco (Remote)",
+      "responsibilities": [
+        "Developed and maintained multiple enterprise-grade web and mobile applications using React, Next.js, React Native, and NestJS, delivering scalable, high-performance solutions.",
+        "Built robust RESTful APIs and backend services with NestJS, MongoDB, PostgreSQL, and Prisma ORM to support real-time features, analytics, and AI-driven workflows.",
+        "Designed and shipped production-ready features across products, including AI integrations, LMS platforms, analytics tools, and mobile apps, ensuring reliable infrastructure and seamless user experiences."
+      ]
+    },
+    {
+      "role": "Full Stack Web and App Developer",
+      "company": "United Protocol",
+      "period": "Dec 2024 – Jul 2025",
+      "location": "Auckland, New Zealand (remote)",
+      "responsibilities": [
+        "Built an AI-agentic mobile browser for iOS and Android with React Native, integrating Meta LLaMA, Langchain, Together AI, Groq, and Node.js.",
+        "Developed real-time speech-to-speech voice agents with Hume AI and Twilio, and enabled offline LLM inference with ONNX for performance and privacy.",
+        "Implemented decentralized history storage using IPFS and BNB blockchain with secure, scalable webhook architecture."
+      ]
+    },
+    {
+      "role": "Frontend Developer",
+      "company": "WhatBytes",
+      "period": "Jun 2024 – Oct 2024",
+      "location": "Ontario, Canada (remote)",
+      "responsibilities": [
+        "Developed and optimized a high-traffic Svelte app supporting 70,000–100,000+ weekly users, focusing on performance and scalability.",
+        "Built frontend solutions with Next.js and React.js, including server-side components for efficient data handling.",
+        "Designed and implemented custom analytics dashboards with Google Analytics and Facebook Insights."
+      ]
+    },
+    {
+      "role": "Full Stack Intern",
+      "company": "United Protocol",
+      "period": "May 2023 – May 2024",
+      "location": "Auckland, New Zealand (remote)",
+      "responsibilities": [
+        "Built web and desktop apps using React, Next.js, Electron.js, Tauri, and MERN stack, delivering performant cross-platform solutions.",
+        "Developed and deployed smart contracts on Binance Smart Chain (BSC) with blockchain integrations.",
+        "Explored Unreal Engine Pixel Streaming and contributed to AI-driven applications, deepening expertise in decentralized technologies."
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "category": "Frontend",
+      "description": "Building modern web applications with cutting-edge frameworks",
+      "items": ["Next.js", "React", "Svelte", "Three.Js"]
+    },
+    {
+      "category": "Backend & Desktop",
+      "description": "Developing robust server-side and desktop applications",
+      "items": ["Node.js", "MongoDB", "PostgreSql", "Electron/Tauri"]
+    },
+    {
+      "category": "Mobile",
+      "description": "Developing android apps and browser",
+      "items": ["React Native", "Expo", "Android Studio"]
+    },
+    {
+      "category": "UI Frameworks",
+      "description": "Crafting beautiful user interfaces with modern CSS frameworks",
+      "items": ["Tailwind CSS", "Shadcn UI", "Chakra UI", "Bootstrap"]
+    },
+    {
+      "category": "Technologies",
+      "description": "Implementing advanced technical solutions",
+      "items": ["Blockchain", "Smart Contracts", "Unreal Engine"]
+    }
+  ],
+  "projects": [
+    {
+      "title": "Quotient",
+      "description": "Location-based application with interactive maps and real-time updates. Features a scalable backend built with Node.js and Appwrite.",
+      "category": "Maps",
+      "technologies": ["NextJS", "TypeScript", "Prisma ORM", "NeonDB"],
+      "links": {
+        "live": "https://quotient-dun.vercel.app/",
+        "github": "https://github.com/devhimanshuhc/quotient"
+      }
+    },
+    {
+      "title": "Revio",
+      "description": "A comprehensive real estate platform built with Next.js, leveraging RapidAPI for property data. Features include advanced property search, detailed listings, and interactive maps.",
+      "category": "Real Estate",
+      "technologies": ["Next.js", "RapidAPI", "Axios", "TailwindCSS"],
+      "featured": true,
+      "links": {
+        "live": "https://revio.vercel.app/",
+        "github": "https://github.com/devhimanshuhc/ReVio"
+      }
+    },
+    {
+      "title": "CryptoRealms",
+      "description": "Cryptocurrency tracking application providing real-time data on top cryptocurrencies. Built with React and RTK Query for efficient state management.",
+      "category": "Cryptocurrency",
+      "technologies": ["React", "RTK Query", "RapidAPI", "Tailwind CSS"],
+      "links": {
+        "live": "https://cryptorealms.vercel.app",
+        "github": "https://github.com/devhimanshuhc/cryptorealms"
+      }
+    },
+    {
+      "title": "Portfolio Website",
+      "description": "Interactive portfolio featuring 3D animations, custom terminal-like interactions, and smooth transitions. Built with Next.js and TypeScript.",
+      "category": "Personal",
+      "technologies": ["Next.js", "TypeScript", "Three.js", "Tailwind CSS"],
+      "featured": true,
+      "links": {
+        "live": "#",
+        "github": "#"
+      }
+    },
+    {
+      "title": "Muchas",
+      "description": "Location-based application with interactive maps and real-time updates. Features a scalable backend built with Node.js and Appwrite.",
+      "category": "Maps",
+      "technologies": ["React", "TypeScript", "Node.js", "Appwrite"],
+      "links": {
+        "live": "#",
+        "github": "https://github.com/devhimanshuhc/Muchas"
+      }
+    }
+  ],
+  "photography": {
+    "sectionTitle": "Through My Lens",
+    "quote": {
+      "text": "Photography is the story I fail to put into words.",
+      "attribution": "Destin Sparks"
+    },
+    "narrative": "When I'm not coding, you'll find me with a camera in hand, capturing the play of light and shadow. It's a creative outlet that mirrors my approach to coding—paying attention to the details, finding innovative solutions, and always striving for perfection.",
+    "interests": [
+      "Street Photography",
+      "Urban Landscapes",
+      "Nature",
+      "Portraits"
+    ],
+    "carousel": [
+      { "relativePath": "/pic1.jpg", "caption": "City Lifes" },
+      { "relativePath": "/pic2.jpeg", "caption": "Travel" },
+      { "relativePath": "/pic3.jpeg", "caption": "Skyline Views" },
+      { "relativePath": "/pic4.jpeg", "caption": "Temples" },
+      { "relativePath": "/pic5.jpeg", "caption": "Urban Landscapes" },
+      { "relativePath": "/pic6.jpeg", "caption": "Sky Scenes" },
+      { "relativePath": "/pic7.jpg", "caption": "Mountain Views" },
+      { "relativePath": "/pic8.jpg", "caption": "City Lights" },
+      { "relativePath": "/pic9.jpeg", "caption": "Lost Forest" }
+    ]
+  },
+  "contactAndSocial": {
+    "email": "devhimanshuhc@gmail.com",
+    "profiles": [
+      {
+        "label": "GitHub",
+        "url": "https://github.com/devhimanshuhc"
+      },
+      {
+        "label": "LinkedIn",
+        "url": "https://www.linkedin.com/in/devhimanshuhc/"
+      },
+      {
+        "label": "Instagram",
+        "url": "https://www.instagram.com/hiimanshu.chauhan/"
+      },
+      {
+        "label": "Twitter",
+        "url": "https://x.com/devhimanshuhc"
+      }
+    ],
+    "contactSectionIntro": "Have a project in mind or just want to chat? I'd love to hear from you.",
+    "contactSectionBoldLine": "Let's Create Something Amazing",
+    "contactSectionBody": "Whether you have a project that needs technical expertise or just want to explore potential collaborations, I'm always excited to discuss new opportunities."
+  },
+  "siteNavigationAndAssets": {
+    "heroAnchors": [
+      { "label": "Get in Touch", "href": "#contact" },
+      { "label": "View My Work", "href": "#projects" }
+    ],
+    "resumePdf": {
+      "path": "/resume-hc.pdf",
+      "opensInNewTab": true
+    },
+    "sectionOrderOnHomepage": [
+      "hero",
+      "about",
+      "skills",
+      "experience",
+      "location",
+      "projects",
+      "photography",
+      "contact",
+      "footer"
+    ],
+    "footerAttribution": "Created with love by Himanshu Chauhan (linked to GitHub profile)"
+  },
+  "integrationsMentionedInCode": {
+    "map": "Mapbox (dark style, marker at configured coordinates)",
+    "weatherOverlay": "OpenWeather API (latitude/longitude aligned with map center)",
+    "musicWidget": "Spotify Web API (/api/spotify) for currently-playing or recently played tracks"
+  }
+}

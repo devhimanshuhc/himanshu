@@ -1,4 +1,3 @@
-import type { GetImageResult } from "astro";
 import { Button, buttonVariants } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { GithubIcon, SquareArrowOutUpRightIcon } from "lucide-react";
@@ -18,7 +17,7 @@ export const ProjectsIsland = ({
   // Group projects by type
   const groupedProjects = projects.reduce(
     (acc: Record<string, Project[]>, project: Project) => {
-      const type = project.type || "Other"; // Default to "Other" if type is not defined
+      const type = project.category || "Other";
       if (!acc[type]) {
         acc[type] = [];
       }
@@ -101,25 +100,37 @@ export const ProjectsIsland = ({
           className="md:border-l border-input"
         >
           <img
-            src={project.image.src}
-            width={project.image.width}
-            height={project.image.height}
-            className="border-b border-input"
+            src={project.image}
+            alt={project.label}
+            className="border-b border-input w-full aspect-video object-cover"
+            loading="lazy"
+            decoding="async"
           />
           <div className="flex flex-col">
             <span className="py-3 px-4 font-inter text-sm text-secondary-foreground/75">
               {project.description}
             </span>
             <div className="grid grid-cols-2 place-items-center">
-              <Button variant="ghost" asChild>
-                <a
+              {project.link === "#" ? (
+                <Button
+                  variant="ghost"
                   className="h-full py-3 font-inter text-xs w-full rounded-none border-t border-r border-input"
-                  href={project.link}
-                  target="_blank"
+                  disabled
                 >
                   Open Link <SquareArrowOutUpRightIcon />
-                </a>
-              </Button>
+                </Button>
+              ) : (
+                <Button variant="ghost" asChild>
+                  <a
+                    className="h-full py-3 font-inter text-xs w-full rounded-none border-t border-r border-input"
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Open Link <SquareArrowOutUpRightIcon />
+                  </a>
+                </Button>
+              )}
 
               {project.github === "#" ? (
                 <Button
@@ -138,6 +149,7 @@ export const ProjectsIsland = ({
                   )}
                   href={project.github}
                   target="_blank"
+                  rel="noopener noreferrer"
                 >
                   Source Code
                   <GithubIcon />

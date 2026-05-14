@@ -3,27 +3,20 @@ import DeviconSvelte from "../assets/icons/DeviconSvelte.svg";
 import DeviconNextjs from "../assets/icons/DeviconPlainNextjs.svg";
 import DeviconReactnative from "../assets/icons/DeviconReactnative.svg";
 import SimpleIconsExpo from "../assets/icons/SimpleIconsExpo.svg";
-// import Tanstack from "../assets/icons/Tanstack.png"
-import Golang from "../assets/icons/Golang.svg";
-import Hono from "../assets/icons/Hono.svg";
+import DeviconNestjs from "../assets/icons/DeviconNestjs.svg";
+import DeviconPython from "../assets/icons/DeviconPython.svg";
 import Postgres from "../assets/icons/Postgres.svg";
 import Typescript from "../assets/icons/Typescript.svg";
 
-import aiRecoveryProjectImage from "../assets/projects/ai-recovery.png";
-import sophistAIProjectImage from "../assets/projects/sophist-ai.png";
-import pChatProjectImage from "../assets/projects/pchat.png";
-import aconewsProjectImage from "../assets/projects/aconews.png";
-import TextPilotProjectImage from "../assets/projects/text-pilot.png";
-
 export const CONTENT = {
   hero: {
-    sub: "hi i'm shahank42, a",
-    main1: "fullstack web dev",
-    main2: "+\npro keyboard smasher",
+    sub: "hi i'm ansh, a",
+    main1: "full stack web + app",
+    main2: "developer",
     paragraph1:
-      "i write performant and scalable software. been writing code ever since i got access to a computer back in 2009.",
+      "i'm a full-stack web and app developer with a passion for 3d and design animation building immersive digital experiences that blend technology and creativity.",
     paragraph2:
-      "need someone to help you build the next biggest thing? i've got your back.",
+      "need someone to help you ship across web, mobile, and the stack behind it all? i've got your back.",
     tools: [
       {
         label: "Typescript",
@@ -33,29 +26,21 @@ export const CONTENT = {
         label: "React",
         Icon: DeviconReact,
       },
-      // {
-      //   label: "Tanstack Tools",
-      //   Icon: Tanstack,
-      // },
       {
-        label: "Svelte/SvelteKit",
+        label: "Svelte",
         Icon: DeviconSvelte,
       },
       {
         label: "Next.js",
         Icon: DeviconNextjs,
       },
-      // {
-      //   label: "SvelteKit",
-      //   Icon: DeviconSvelte,
-      // },
       {
-        label: "Golang",
-        Icon: Golang,
+        label: "NestJS",
+        Icon: DeviconNestjs,
       },
       {
-        label: "Hono",
-        Icon: Hono,
+        label: "Python",
+        Icon: DeviconPython,
       },
       {
         label: "PostgreSQL",
@@ -76,17 +61,17 @@ export const CONTENT = {
       {
         title: "performance first",
         description:
-          "i build lightning-fast applications that don't just work—they fly. optimized for core web vitals and user experience.",
+          "i build fast apps that stay fast—optimized for real users, real devices, and the messy production edge cases that show up after launch.",
       },
       {
         title: "modern stack",
         description:
-          "leveraging the latest tech like tanstack, next.js, astro, react 19, sveltekit, convex, etc. and go to build scalable, maintainable software for the future.",
+          "react, next.js, react native, nestjs, strong backends, and integrations—from analytics and ai workflows to blockchain and mobile when the problem calls for it.",
       },
       {
         title: "pixel perfect",
         description:
-          "meticulous attention to detail in design implementation. your vision, translated perfectly into code.",
+          "meticulous attention to detail in design implementation. your vision, translated faithfully into interfaces people enjoy using.",
       },
     ],
     basePrices: {
@@ -103,56 +88,104 @@ export const CONTENT = {
       responsive: 8000,
     },
   },
+  /** Mirrors `skills` + `taglines.skillsSectionTitle` in portfolio-profile.json */
+  skillsSection: {
+    title: "technical arsenal",
+    categories: [
+      {
+        name: "Frontend",
+        description:
+          "Building modern web applications with cutting-edge frameworks",
+        items: ["Next.js", "React", "Svelte", "Three.js"],
+      },
+      {
+        name: "Backend & Desktop",
+        description: "Developing robust server-side and desktop applications",
+        items: ["Node.js", "MongoDB", "PostgreSQL", "Electron/Tauri"],
+      },
+      {
+        name: "Mobile",
+        description: "Developing android apps and browser",
+        items: ["React Native", "Expo", "Android Studio"],
+      },
+      {
+        name: "UI Frameworks",
+        description:
+          "Crafting beautiful user interfaces with modern CSS frameworks",
+        items: ["Tailwind CSS", "Shadcn UI", "Chakra UI", "Bootstrap"],
+      },
+      {
+        name: "Technologies",
+        description: "Implementing advanced technical solutions",
+        items: ["Blockchain", "Smart Contracts", "Unreal Engine"],
+      },
+    ],
+  },
   projects: [
     {
-      key: "textpilot",
-      label: "TextPilot",
-      image: TextPilotProjectImage,
+      key: "quotient",
+      label: "Quotient",
+      description:
+        "A lightweight writing workspace for quick notes and drafts—Keep-style capture with a clean editor, organized notebooks, and a fast Next.js stack backed by Prisma and Neon.",
+      image:
+        "https://images.unsplash.com/reserve/LJIZlzHgQ7WPSh5KVTCB_Typewriter.jpg?q=80&w=1896&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      category: "Productivity",
+      tech: ["NextJS", "TypeScript", "Prisma ORM", "NeonDB"],
+      link: "https://quotient-dun.vercel.app/",
+      github: "https://github.com/devhimanshuhc/quotient",
+      featured: false,
+    },
+    {
+      key: "datasays",
+      label: "DataSays",
+      description:
+        "An AI-powered data assistant—ask questions in plain language, explore your metrics, and get answers without drowning in spreadsheets or SQL. Live product at datasays.app.",
+      image:
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop",
+      category: "AI",
+      tech: ["AI", "Data", "TypeScript"],
+      link: "https://datasays.app/",
+      github: "#",
+      featured: false,
+    },
+    {
+      key: "revio",
+      label: "Revio",
+      description:
+        "A comprehensive real estate platform built with Next.js, leveraging RapidAPI for property data. Features include advanced property search, detailed listings, and interactive maps.",
+      image:
+        "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1973&auto=format&fit=crop",
+      category: "Real Estate",
+      tech: ["Next.js", "RapidAPI", "Axios", "TailwindCSS"],
+      link: "https://revio.vercel.app/",
+      github: "https://github.com/devhimanshuhc/ReVio",
+      featured: true,
+    },
+    {
+      key: "cryptorealms",
+      label: "CryptoRealms",
+      description:
+        "Cryptocurrency tracking application providing real-time data on top cryptocurrencies. Built with React and RTK Query for efficient state management.",
+      image:
+        "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?q=80&w=2069&auto=format&fit=crop",
+      category: "Cryptocurrency",
+      tech: ["React", "RTK Query", "RapidAPI", "Tailwind CSS"],
+      link: "https://cryptorealms.vercel.app",
+      github: "https://github.com/devhimanshuhc/cryptorealms",
+      featured: false,
+    },
+    {
+      key: "portfolio",
+      label: "Portfolio Website",
+      description:
+        "Interactive portfolio featuring 3D animations, custom terminal-like interactions, and smooth transitions. Built with Next.js and TypeScript.",
+      image:
+        "https://images.unsplash.com/photo-1545665277-5937489579f2?q=80&w=2070&auto=format&fit=crop",
+      category: "Personal",
+      tech: ["Next.js", "TypeScript", "Three.js", "Tailwind CSS"],
       link: "#",
-      github: "https://github.com/shahank42/textpilot/",
-      description:
-        "TextPilot is a self-hostable and soon installable WhatsApp client with an AI Co-pilot!",
-      type: "side project",
-    },
-    {
-      key: "sophist-ai",
-      label: "SophistAI",
-      image: sophistAIProjectImage,
-      link: "https://sophistai.app",
       github: "#",
-      description:
-        "Struggling with a messy, multi-page syllabus before exams? SophistAI turns it into a clear, interactive mind map— so you can study smarter, not harder. 10k+ views, 700+ users.",
-      type: "hackathon",
-    },
-    {
-      key: "pchat",
-      label: "pChat",
-      image: pChatProjectImage,
-      link: "https://pchat-chi.vercel.app",
-      github: "https://github.com/shahank42/pChat/",
-      description:
-        "A quick, disposable and decentralized messaging app for the web. Everything is stored in a decentralised database, no servers involved! Everyone using the app stores some part of the database with them, forming a peer-to-peer network.",
-      type: "side project",
-    },
-    {
-      key: "aconews",
-      label: "aconews",
-      image: aconewsProjectImage,
-      link: "https://aconews-6e1e1.web.app/",
-      github: "https://github.com/shahank42/aconews",
-      description:
-        "aconews is a modern news aggregator. It provides users with a seamless experience to stay updated on the latest news across various categories.",
-      type: "side project",
-    },
-    {
-      key: "ai-recovery",
-      label: "AI-Recovery and High Value Services",
-      image: aiRecoveryProjectImage,
-      link: "https://ai-recovery.co.in",
-      github: "#",
-      description:
-        "AI- Recovery & High Value Services is a modern consulting firm which empowers consumers in terms of contributing a small portion in developing a sustainable livelihood.",
-      type: "freelance",
+      featured: true,
     },
   ],
 };

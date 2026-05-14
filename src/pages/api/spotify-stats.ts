@@ -2,6 +2,8 @@ import type { APIRoute } from "astro";
 
 export const prerender = false;
 
+const RECENTLY_PLAYED_LIMIT = 8;
+
 const CLIENT_ID = import.meta.env.SPOTIFY_CLIENT_ID;
 const CLIENT_SECRET = import.meta.env.SPOTIFY_CLIENT_SECRET;
 const REFRESH_TOKEN = import.meta.env.SPOTIFY_REFRESH_TOKEN;
@@ -99,7 +101,7 @@ async function getRecentTracks(
   accessToken: string,
 ): Promise<SpotifyRecentlyPlayedResponse> {
   const response = await fetch(
-    "https://api.spotify.com/v1/me/player/recently-played?limit=5",
+    `https://api.spotify.com/v1/me/player/recently-played?limit=${RECENTLY_PLAYED_LIMIT}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
