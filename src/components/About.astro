@@ -1,0 +1,46 @@
+---
+import { NumberTicker } from "@/components/ui/number-ticker"
+import { CONTENT } from "@/lib/content"
+---
+
+<section id="about" class="mx-[var(--frame)] scroll-mt-[var(--nav-h)] border-t border-foreground/80 pt-6 pb-32 md:pb-48">
+  <div id="content" class="grid gap-10 md:grid-cols-12">
+    <p data-fade class="caption text-muted-foreground md:col-span-3">(about)</p>
+
+    <div class="md:col-span-9 lg:col-span-8">
+      <p data-scrub class="text-[1.75rem] leading-[1.18] tracking-[-0.03em] md:text-[2.6rem] lg:text-[3.25rem]">
+        hello — i'm ansh, an ai engineer and full stack developer based in the hills of dehradun. i ship <span class="accent">llm features</span> that hold up in production — retrieval over real
+        records, agents that call real tools, and the apps people use them through.
+      </p>
+
+      <div class="mt-16 grid gap-8 text-body md:mt-24 md:grid-cols-2">
+        <p data-fade class="max-w-md text-pretty text-[15px] leading-relaxed md:text-base">
+          1.5+ years of production llm work: rag over clinical records, tool-calling agents for equity workflows, and an
+          agentic mobile browser. python, fastapi, langchain and the vercel ai sdk — and i build with claude code.
+        </p>
+        <p data-fade data-delay="0.08" class="max-w-md text-pretty text-[15px] leading-relaxed md:text-base">
+          <span class="font-medium text-foreground">i go deep on product engineering.</span> from schema to screen —
+          fastapi and nestjs services, queues and websockets, react native and next.js. open to ai engineering roles and
+          freelance work.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <dl class="mt-24 grid border-t border-border md:mt-32 md:grid-cols-3">
+    {
+      CONTENT.stats.map((stat, i) => (
+        <div
+          data-fade
+          data-delay={String(i * 0.06)}
+          class="flex items-baseline justify-between gap-4 border-b border-border py-6 md:flex-col md:items-start md:border-b-0 md:border-r md:px-6 md:py-8 md:first:pl-0 md:last:border-r-0"
+        >
+          <dt class="caption order-2 text-muted-foreground md:order-2">{stat.label}</dt>
+          <dd class="order-1 text-5xl font-medium tracking-[-0.05em] tabular-nums md:text-7xl">
+            <NumberTicker client:visible value={stat.value} className="tracking-[-0.05em] text-foreground" />{stat.suffix}
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>

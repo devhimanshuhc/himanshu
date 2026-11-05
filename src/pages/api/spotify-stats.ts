@@ -89,7 +89,11 @@ async function getAccessToken(): Promise<string> {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to refresh access token");
+    // e.g. "invalid_grant: Refresh token revoked" -> mint a new one with scripts/spotify-auth.mjs
+    const detail = await response.json().catch(() => null);
+    throw new Error(
+      `Failed to refresh access token${detail?.error ? ` (${detail.error}: ${detail.error_description ?? ""})` : ""}`,
+    );
   }
 
   const data: SpotifyTokenResponse = await response.json();

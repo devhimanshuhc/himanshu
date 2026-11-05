@@ -1,28 +1,21 @@
 ---
-import { PricingCalculator } from "@/components/PricingCalculator";
+import { PricingCalculator } from "@/components/PricingCalculator"
 ---
 
-<section id="calculator" class="border-b-0 border-input scroll-mt-20">
-  <div
-    class="grid justify-center lg:mx-auto grid-cols-1 md:grid-cols-[1fr_minmax(0,var(--width-landing-container))_1fr]"
-  >
-    <div class="col-start-1 hidden md:block"></div>
-    <div class="border-b-0 border-input">
-      <div
-        class="border-x border-b-0 border-input p-8 lg:px-10 py-16 flex flex-col items-center justify-center text-center space-y-6"
-      >
-        <h2
-          class="font-zilla-slab text-4xl md:text-6xl tracking-tighter lowercase"
-        >
-          pricing <span class="text-primary">calculator</span>
-        </h2>
-        <p class="font-inter text-muted-foreground text-lg max-w-lg lowercase">
-          get a rough estimate for your next big idea. select the parameters
-          below to calculate the investment.
-        </p>
-      </div>
-      <PricingCalculator client:load />
+<section id="calculator" class="mx-[var(--frame)] scroll-mt-[var(--nav-h)] border-t border-foreground/80 pt-6 pb-32 md:pb-48">
+  <div class="mb-16 grid gap-10 md:grid-cols-12">
+    <p data-fade class="caption text-muted-foreground md:col-span-3">(estimate)</p>
+    <div class="md:col-span-9">
+      <h2 data-split="lines" class="text-5xl font-medium leading-none tracking-[-0.05em] md:text-7xl">
+        pricing <span class="accent">calculator</span>
+      </h2>
+      <p data-fade class="mt-6 max-w-md text-pretty text-[15px] leading-relaxed text-body md:text-base">
+        get a rough estimate for your next big idea. pick the parameters below to see the investment.
+      </p>
     </div>
-    <div class="col-start-3 hidden md:block"></div>
+  </div>
+
+  <div data-fade>
+    <PricingCalculator client:visible />
   </div>
 </section>

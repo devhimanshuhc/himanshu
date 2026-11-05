@@ -1,0 +1,67 @@
+---
+import { CONTENT } from "@/lib/content"
+
+const year = new Date().getFullYear()
+---
+
+<footer id="contact" class="mx-[var(--frame)] border-t border-foreground/80 pb-[var(--frame)] pt-6">
+  <p data-fade class="caption text-muted-foreground">(contact)</p>
+
+  <div class="mt-16 flex flex-col gap-12 md:mt-24 lg:flex-row lg:items-end lg:justify-between">
+    <h2 data-split="lines" class="text-[3.25rem] font-medium leading-[0.92] tracking-[-0.055em] md:text-8xl lg:text-[9rem]">
+      got an idea?<br />
+      <span class="accent">let’s talk.</span>
+    </h2>
+    <a
+      href="/hire"
+      class="inline-flex h-12 w-fit items-center gap-3 rounded-full bg-foreground px-6 text-[15px] font-medium text-background transition-opacity hover:opacity-80"
+    >
+      Start a project <span aria-hidden="true">→</span>
+    </a>
+  </div>
+
+  <div class="mt-24 grid gap-8 border-t border-border pt-6 md:mt-32 md:grid-cols-4">
+    <div class="caption text-muted-foreground">
+      <p class="text-foreground">based in</p>
+      <p class="mt-2">dehradun, india</p>
+      <p data-clock class="tabular-nums">--:-- IST</p>
+    </div>
+    <ul class="caption">
+      <li class="text-foreground">elsewhere</li>
+      {
+        CONTENT.socials.map((s) => (
+          <li class="mt-2">
+            <a
+              href={s.href}
+              target={s.href.startsWith("http") ? "_blank" : undefined}
+              rel={s.href.startsWith("http") ? "noopener noreferrer" : undefined}
+              class="text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {s.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="caption text-muted-foreground">
+      <p class="text-foreground">colophon</p>
+      <p class="mt-2">geist · instrument serif</p>
+      <p>astro · three.js · gsap</p>
+      <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="hover:text-foreground">secret link</a>
+    </div>
+    <div class="caption text-muted-foreground md:text-right">
+      <p class="text-foreground">© {year} himanshu chauhan</p>
+      <p class="mt-2">written with love</p>
+      <a href="#top" class="mt-2 inline-block text-foreground hover:opacity-60">back to top ↑</a>
+    </div>
+  </div>
+
+  <p
+    aria-hidden="true"
+    data-parallax="0.15"
+    class="pointer-events-none mt-16 select-none whitespace-nowrap text-center text-[26vw] font-semibold leading-[0.78] tracking-[-0.07em]"
+    translate="no"
+  >
+    (ansh)
+  </p>
+</footer>

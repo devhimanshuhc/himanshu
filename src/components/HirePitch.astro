@@ -1,28 +1,26 @@
 ---
-import { CONTENT } from "@/lib/content";
+import { CONTENT } from "@/lib/content"
 ---
 
-<section class="border-b border-input">
-  <div
-    class="grid justify-center lg:mx-auto grid-cols-1 md:grid-cols-[1fr_minmax(0,var(--width-landing-container))_1fr]"
-  >
-    <div class="col-start-1 hidden md:block"></div>
-    <div class="py-20 px-8 lg:px-10 border-x border-input">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-        {
-          CONTENT.hire.pitch.map((item, index) => (
-            <div class="space-y-4">
-              <h3 class="font-inter text-sm text-muted-foreground uppercase tracking-widest">
-                0{index + 1} // {item.title}
-              </h3>
-              <p class="font-inter text-foreground leading-relaxed text-lg lowercase">
-                {item.description}
-              </p>
-            </div>
-          ))
-        }
-      </div>
-    </div>
-    <div class="col-start-3 hidden md:block"></div>
+<section id="content" class="mx-[var(--frame)] mt-[var(--frame)] border-t border-foreground/80 pt-6 pb-32 md:pb-48">
+  <div class="mb-16 grid gap-10 md:mb-24 md:grid-cols-12">
+    <p data-fade class="caption text-muted-foreground md:col-span-3">(why me)</p>
+    <h2 data-split="lines" class="text-5xl font-medium leading-none tracking-[-0.05em] md:col-span-9 md:text-7xl">
+      small team energy, <span class="accent">senior</span> care.
+    </h2>
   </div>
+
+  <ol class="grid md:grid-cols-3">
+    {
+      CONTENT.hire.pitch.map((item, index) => (
+        <li class="flex flex-col gap-6 border-t border-border py-8 md:border-l md:border-t-0 md:px-6 md:py-2 md:first:border-l-0 md:first:pl-0">
+          <span class="caption text-muted-foreground">0{index + 1}</span>
+          <h3 class="text-2xl font-medium tracking-[-0.03em]">{item.title}</h3>
+          <p data-split="lines" data-delay={String(index * 0.08)} class="text-pretty text-[15px] leading-relaxed text-body">
+            {item.description}
+          </p>
+        </li>
+      ))
+    }
+  </ol>
 </section>

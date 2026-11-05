@@ -1,77 +1,28 @@
-import DeviconReact from "../assets/icons/DeviconReact.svg";
-import DeviconSvelte from "../assets/icons/DeviconSvelte.svg";
-import DeviconNextjs from "../assets/icons/DeviconPlainNextjs.svg";
-import DeviconReactnative from "../assets/icons/DeviconReactnative.svg";
-import SimpleIconsExpo from "../assets/icons/SimpleIconsExpo.svg";
-import DeviconNestjs from "../assets/icons/DeviconNestjs.svg";
-import DeviconPython from "../assets/icons/DeviconPython.svg";
-import Postgres from "../assets/icons/Postgres.svg";
-import Typescript from "../assets/icons/Typescript.svg";
-
+/** Site copy. Profile, experience, projects and skills mirror the AI engineer resume. */
 export const CONTENT = {
-  hero: {
-    sub: "hi i'm ansh, a",
-    main1: "full stack web + app",
-    main2: "developer",
-    paragraph1:
-      "i'm a full-stack web and app developer with a passion for 3d and design animation building immersive digital experiences that blend technology and creativity.",
-    paragraph2:
-      "need someone to help you ship across web, mobile, and the stack behind it all? i've got your back.",
-    tools: [
-      {
-        label: "Typescript",
-        Icon: Typescript,
-      },
-      {
-        label: "React",
-        Icon: DeviconReact,
-      },
-      {
-        label: "Svelte",
-        Icon: DeviconSvelte,
-      },
-      {
-        label: "Next.js",
-        Icon: DeviconNextjs,
-      },
-      {
-        label: "NestJS",
-        Icon: DeviconNestjs,
-      },
-      {
-        label: "Python",
-        Icon: DeviconPython,
-      },
-      {
-        label: "PostgreSQL",
-        Icon: Postgres,
-      },
-      {
-        label: "React Native",
-        Icon: DeviconReactnative,
-      },
-      {
-        label: "Expo",
-        Icon: SimpleIconsExpo,
-      },
-    ],
+  profile: {
+    name: "Himanshu Chauhan",
+    role: "ai engineer · full stack",
+    headline: "llms, rag & agents — shipped to production",
+    email: "himanshu.chauhan07@icloud.com",
+    location: "dehradun, india",
   },
   hire: {
     pitch: [
       {
+        title: "ai that ships",
+        description:
+          "llm features with rag, tool calling, structured outputs, evals and guardrails—built to run in production, not just in a demo.",
+      },
+      {
+        title: "end to end",
+        description:
+          "fastapi and nestjs backends, react native and next.js frontends, queues, websockets and aws—i own a feature from schema to screen.",
+      },
+      {
         title: "performance first",
         description:
-          "i build fast apps that stay fast—optimized for real users, real devices, and the messy production edge cases that show up after launch.",
-      },
-      {
-        title: "modern stack",
-        description:
-          "react, next.js, react native, nestjs, strong backends, and integrations—from analytics and ai workflows to blockchain and mobile when the problem calls for it.",
-      },
-      {
-        title: "pixel perfect",
-        description:
-          "meticulous attention to detail in design implementation. your vision, translated faithfully into interfaces people enjoy using.",
+          "fast apps that stay fast—optimized for real users, real devices, and the messy production edge cases that show up after launch.",
       },
     ],
     basePrices: {
@@ -88,49 +39,195 @@ export const CONTENT = {
       responsive: 8000,
     },
   },
-  /** Mirrors `skills` + `taglines.skillsSectionTitle` in portfolio-profile.json */
   skillsSection: {
     title: "technical arsenal",
     categories: [
       {
-        name: "Frontend",
-        description:
-          "Building modern web applications with cutting-edge frameworks",
-        items: ["Next.js", "React", "Svelte", "Three.js"],
+        name: "AI",
+        description: "Retrieval, agents and the guardrails that keep them honest",
+        items: [
+          "LLMs",
+          "RAG",
+          "Vector search",
+          "LangChain",
+          "Tool calling",
+          "Structured outputs",
+          "Guardrails",
+          "OpenAI",
+          "Gemini",
+          "Vercel AI SDK",
+          "Groq",
+          "Claude Code",
+          "LLM evals (LLM-as-judge)",
+        ],
       },
       {
-        name: "Backend & Desktop",
-        description: "Developing robust server-side and desktop applications",
-        items: ["Node.js", "MongoDB", "PostgreSQL", "Electron/Tauri"],
+        name: "Backend",
+        description: "Services, queues and infrastructure that hold up under load",
+        items: [
+          "FastAPI",
+          "NestJS",
+          "Node.js",
+          "MongoDB",
+          "PostgreSQL",
+          "Prisma",
+          "Redis",
+          "BullMQ",
+          "Docker",
+          "AWS (S3, ECS, ECR, ElastiCache, ALB)",
+          "GitHub Actions",
+          "WebSockets",
+          "Playwright",
+          "pytest",
+        ],
       },
       {
-        name: "Mobile",
-        description: "Developing android apps and browser",
-        items: ["React Native", "Expo", "Android Studio"],
+        name: "Mobile & Frontend",
+        description: "Interfaces on the web and in your pocket",
+        items: ["React Native (Expo)", "React", "Next.js", "TailwindCSS", "TanStack Query"],
       },
       {
-        name: "UI Frameworks",
-        description:
-          "Crafting beautiful user interfaces with modern CSS frameworks",
-        items: ["Tailwind CSS", "Shadcn UI", "Chakra UI", "Bootstrap"],
-      },
-      {
-        name: "Technologies",
-        description: "Implementing advanced technical solutions",
-        items: ["Blockchain", "Smart Contracts", "Unreal Engine"],
+        name: "Languages",
+        description: "Day to day",
+        items: ["TypeScript", "JavaScript", "Python", "SQL", "Lua", "Solidity"],
       },
     ],
   },
+  experience: [
+    {
+      company: "Heizen",
+      link: "https://heizen.work",
+      location: "san francisco · remote",
+      period: "aug 2025 – oct 2026",
+      note: "backed by titan capital ($500k); featured on shark tank india & forbes",
+      roles: [
+        {
+          title: "software development engineer",
+          period: "jun 2026 – oct 2026",
+          points: [
+            "evra (ai healthcare, 3k+ users): cut clinical data entry 40% by shipping llm summarization and rag over patient records—mongodb vector search and langchain on fastapi, fernet-encrypted clinical fields, role-based clinician auth, and a react native (expo) app.",
+            "heizen studio (open-source ai dev tools, 5k+ users): owned system architecture, api contracts, and delivery end to end.",
+            "medurun (ambulance dispatch, pre-launch): architected real-time dispatch (nestjs, redis geospatial search, socket.io, atomic lua, bullmq) and shipped the react native rider and driver apps plus next.js dashboards.",
+          ],
+        },
+        {
+          title: "associate software development engineer",
+          period: "feb 2026 – may 2026",
+          points: [
+            "deepmechanix: cut asme pressure-vessel design cycles from weeks to hours by automating pv elite against asme code, including the apis, job orchestration, and validation pipeline.",
+          ],
+        },
+        {
+          title: "software development engineer intern",
+          period: "aug 2025 – jan 2026",
+          points: [
+            "equitynav: built ai insight agents for vesting, exercises, and liquidity on the vercel ai sdk (openai and gemini), with tool calling, sql execution, structured outputs, and guardrails.",
+            "equitynav: unified carta portfolios and an equity-tax engine into projection, scenario, and risk dashboards; automated sync and alerts with nestjs scheduler, docker, and github actions.",
+          ],
+        },
+      ],
+    },
+    {
+      company: "United Protocol",
+      link: null,
+      location: "auckland, nz · remote",
+      period: "may 2023 – jul 2025",
+      note: null,
+      roles: [
+        {
+          title: "full stack developer",
+          period: "may 2023 – may 2024, dec 2024 – jul 2025",
+          points: [
+            "built an ai-agentic mobile browser in react native (meta llama, langchain, groq) that runs multistep web tasks, and shipped hume ai + twilio speech-to-speech voice agents.",
+            "shipped tamper-proof encrypted history on ipfs + bnb smart chain (solidity), plus web and desktop apps in react, next.js, electron, and tauri.",
+          ],
+        },
+      ],
+    },
+    {
+      company: "WhatBytes",
+      link: null,
+      location: "bangalore, karnataka · remote",
+      period: "jun 2024 – oct 2024",
+      note: null,
+      roles: [
+        {
+          title: "frontend developer",
+          period: "jun 2024 – oct 2024",
+          points: [
+            "improved rendering on a svelte + next.js app serving 70,000–100,000+ weekly users, and built analytics dashboards (google analytics, facebook insights).",
+          ],
+        },
+      ],
+    },
+  ],
+  stats: [
+    { value: 3, suffix: "k+", label: "users on evra, ai healthcare" },
+    { value: 40, suffix: "%", label: "less clinical data entry with rag" },
+    { value: 100, suffix: "k+", label: "weekly users on apps i've tuned" },
+  ],
+  socials: [
+    { label: "github", href: "https://github.com/himanshu-dev-codes" },
+    { label: "linkedin", href: "https://linkedin.com/in/devhimanshuhc" },
+    { label: "email", href: "mailto:himanshu.chauhan07@icloud.com" },
+    { label: "resumé", href: "https://drive.google.com/file/d/1j7_bh8uG6rYlVssZpsvVDMz9-WrMLx18/view?usp=drive_link" },
+  ],
   projects: [
+    {
+      key: "retro",
+      label: "Retro",
+      description:
+        "An actor-based multi-agent research system. Agents run as isolated BullMQ workers and write cited reports; crashed steps resume exactly once and failed jobs replay.",
+      image: "/projects/retro.jpg",
+      category: "Multi-agent AI",
+      tech: ["TypeScript", "BullMQ", "Redis", "LLM agents"],
+      link: "https://retro.ansh.life",
+      github: "https://github.com/devhimanshuhc/retro",
+      featured: true,
+    },
+    {
+      key: "evra",
+      label: "Evra",
+      description:
+        "AI healthcare for 3k+ users. LLM summarization and RAG over patient records cut clinical data entry 40% — MongoDB vector search and LangChain on FastAPI, encrypted clinical fields, clinician auth and a React Native app.",
+      image: "/projects/evra.jpg",
+      category: "AI healthcare · Heizen",
+      tech: ["FastAPI", "LangChain", "MongoDB vector search", "React Native"],
+      link: "https://evrahealth.com/",
+      github: "#",
+      featured: true,
+    },
+    {
+      key: "medurun",
+      label: "Medurun",
+      description:
+        "Real-time ambulance dispatch: Redis geospatial search, Socket.IO, atomic Lua and BullMQ behind NestJS, with React Native rider and driver apps and Next.js dashboards.",
+      image: "/projects/medurun.jpg",
+      category: "Dispatch · Heizen",
+      tech: ["NestJS", "Redis geo", "Socket.IO", "React Native"],
+      link: "https://medurun.com/",
+      github: "#",
+      featured: false,
+    },
+    {
+      key: "equitynav",
+      label: "EquityNav",
+      description:
+        "AI insight agents for vesting, exercises and liquidity on the Vercel AI SDK, with tool calling, SQL execution, structured outputs and guardrails — plus Carta-synced projection, scenario and risk dashboards.",
+      image: "/projects/equitynav.jpg",
+      category: "Equity AI · Heizen",
+      tech: ["Vercel AI SDK", "OpenAI", "Gemini", "NestJS"],
+      link: "#",
+      github: "#",
+      featured: false,
+    },
     {
       key: "quotient",
       label: "Quotient",
-      description:
-        "A lightweight writing workspace for quick notes and drafts—Keep-style capture with a clean editor, organized notebooks, and a fast Next.js stack backed by Prisma and Neon.",
-      image:
-        "https://images.unsplash.com/reserve/LJIZlzHgQ7WPSh5KVTCB_Typewriter.jpg?q=80&w=1896&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      description: "A writing workspace with fast capture and notebooks — Keep-style notes in a clean editor on a fast Next.js stack.",
+      image: "/projects/quotient.jpg",
       category: "Productivity",
-      tech: ["NextJS", "TypeScript", "Prisma ORM", "NeonDB"],
+      tech: ["Next.js", "Prisma", "Neon"],
       link: "https://quotient-dun.vercel.app/",
       github: "https://github.com/devhimanshuhc/quotient",
       featured: false,
@@ -138,54 +235,13 @@ export const CONTENT = {
     {
       key: "datasays",
       label: "DataSays",
-      description:
-        "An AI-powered data assistant—ask questions in plain language, explore your metrics, and get answers without drowning in spreadsheets or SQL. Live product at datasays.app.",
-      image:
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop",
-      category: "AI",
-      tech: ["AI", "Data", "TypeScript"],
+      description: "Plain-English questions return SQL and a chart — an LLM analysis layer for querying and visualizing datasets.",
+      image: "/projects/datasays.jpg",
+      category: "AI analytics",
+      tech: ["LLMs", "SQL", "TypeScript"],
       link: "https://datasays.app/",
       github: "#",
       featured: false,
     },
-    {
-      key: "revio",
-      label: "Revio",
-      description:
-        "A comprehensive real estate platform built with Next.js, leveraging RapidAPI for property data. Features include advanced property search, detailed listings, and interactive maps.",
-      image:
-        "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1973&auto=format&fit=crop",
-      category: "Real Estate",
-      tech: ["Next.js", "RapidAPI", "Axios", "TailwindCSS"],
-      link: "https://revio.vercel.app/",
-      github: "https://github.com/devhimanshuhc/ReVio",
-      featured: true,
-    },
-    {
-      key: "cryptorealms",
-      label: "CryptoRealms",
-      description:
-        "Cryptocurrency tracking application providing real-time data on top cryptocurrencies. Built with React and RTK Query for efficient state management.",
-      image:
-        "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?q=80&w=2069&auto=format&fit=crop",
-      category: "Cryptocurrency",
-      tech: ["React", "RTK Query", "RapidAPI", "Tailwind CSS"],
-      link: "https://cryptorealms.vercel.app",
-      github: "https://github.com/devhimanshuhc/cryptorealms",
-      featured: false,
-    },
-    {
-      key: "portfolio",
-      label: "Portfolio Website",
-      description:
-        "Interactive portfolio featuring 3D animations, custom terminal-like interactions, and smooth transitions. Built with Next.js and TypeScript.",
-      image:
-        "https://images.unsplash.com/photo-1545665277-5937489579f2?q=80&w=2070&auto=format&fit=crop",
-      category: "Personal",
-      tech: ["Next.js", "TypeScript", "Three.js", "Tailwind CSS"],
-      link: "#",
-      github: "#",
-      featured: true,
-    },
   ],
-};
+}

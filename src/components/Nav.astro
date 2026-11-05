@@ -1,0 +1,84 @@
+---
+const path = Astro.url.pathname.replace(/\/$/, "") || "/"
+const isHome = path === "/" || path === "/me"
+const prefix = isHome ? "" : "/"
+
+const links = [
+  { href: `${prefix}#work`, label: "work" },
+  { href: `${prefix}#about`, label: "about" },
+  { href: `${prefix}#experience`, label: "experience" },
+]
+---
+
+<header
+  data-nav
+  data-hidden="false"
+  class="fixed inset-x-0 top-0 z-50 bg-background transition-transform duration-500 ease-[var(--ease-out-expo)] data-[hidden=true]:-translate-y-full"
+>
+  <nav
+    class="flex h-[var(--nav-h)] items-center justify-between border-b border-foreground/80 mx-[var(--frame)]"
+    aria-label="primary"
+  >
+    <a href={isHome ? "#top" : "/"} class="text-lg font-semibold tracking-[-0.04em] md:text-2xl" translate="no">
+      (ansh)
+    </a>
+
+    <ul class="caption hidden items-center gap-8 md:flex">
+      {
+        links.map((link) => (
+          <li>
+            <a href={link.href} class="py-2 text-muted-foreground transition-colors hover:text-foreground">
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <span data-clock class="tabular-nums text-muted-foreground">--:-- IST</span>
+      </li>
+    </ul>
+
+    <div class="flex items-center gap-5">
+      <a
+        href="/hire"
+        class:list={[
+          "hidden text-lg font-semibold tracking-[-0.04em] transition-opacity hover:opacity-60 sm:inline md:text-2xl",
+          path === "/hire" && "opacity-60",
+        ]}
+      >
+        Hire me
+      </a>
+      <button
+        type="button"
+        data-menu-toggle
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        class="group/menu caption -mr-2 min-h-11 px-2 md:hidden"
+      >
+        <span class="group-aria-expanded/menu:hidden">menu</span>
+        <span class="hidden group-aria-expanded/menu:inline">close</span>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<div
+  id="mobile-menu"
+  data-menu
+  data-open="false"
+  class="fixed inset-0 z-[45] flex flex-col justify-end bg-background px-[var(--frame)] pb-10 pt-24 transition-[clip-path] duration-700 ease-[var(--ease-out-expo)] [clip-path:inset(0_0_100%_0)] data-[open=true]:[clip-path:inset(0_0_0%_0)] md:hidden"
+>
+  <ul>
+    {
+      [...links, { href: "#contact", label: "contact" }, { href: "/hire", label: "hire me" }].map((link, i) => (
+        <li class="border-b border-border">
+          <a href={link.href} class="flex items-baseline justify-between py-4 text-4xl font-medium tracking-[-0.04em]">
+            {link.label}
+            <span class="caption text-muted-foreground">0{i + 1}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <p data-clock class="caption mt-8 text-muted-foreground">--:-- IST</p>
+</div>

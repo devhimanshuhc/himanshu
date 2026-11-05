@@ -93,28 +93,28 @@ This document provides instructions and guidelines for AI agents operating withi
 
 ## 6. Visual Design System
 
-### Core Tokens
-- **Colors (OKLCH):** Defined in `src/styles/global.css`.
-  - **Themes:** Light (default) and Dark (`.dark`).
-  - **Key Variables:** `--background`, `--foreground`, `--primary`, `--accent`, `--border`.
-  - **Alpha/Transparency:** Frequently used (e.g., `bg-primary/90`, `dark:bg-black/20`).
-- **Typography:**
-  - **Sans:** `Inter` (`--font-inter`).
-  - **Serif:** `Zilla Slab` (`--font-zilla-slab`) - used for headings.
-- **Layout Variables:**
-  - `--width-gutter`: 16px (Side spacing).
-  - `--width-landing-container`: 1024px (Max content width).
-  - `--header-height`: 55px.
+**Source of truth: [`DESIGN.md`](./DESIGN.md)** ("paper + void", built in the
+[awesome-design-md](https://github.com/voltagent/awesome-design-md) format; the Vercel reference
+file lives in `docs/design/vercel.DESIGN.md`). Read it before any UI change.
+
+### Core Tokens (`src/styles/global.css`)
+- **Paper** page (`--background: #edeae3`, ink `#141414`), single **void** dark surface via the
+  `.void` class (flips the tokens for its children), one accent `--brand` (amber, 3D + tiny dots only).
+- **Fonts:** Geist (`font-sans`), Geist Mono (`font-mono`, `.caption` for eyebrows/labels),
+  Instrument Serif italic (`.accent`, one word per headline). `font-inter` / `font-zilla-slab`
+  are legacy aliases to Geist.
+- **Layout vars:** `--frame` (12px / 24px paper margin), `--nav-h` (56px / 72px).
 
 ### Layout Patterns
-- **Grid System:**
-  - **Desktop:** 3-column grid centering content: `[1fr_minmax(0,var(--width-landing-container))_1fr]`.
-  - **Mobile:** Includes gutters: `[var(--width-gutter)_minmax(...)_var(--width-gutter)]`.
-- **Golden Ratio:** Specific components (e.g., `Hero`) use 1.618 aspect ratios (`GoldenRatioLayoutDesktop`).
-- **Borders:** Extensive use of borders (`border-input`) to define layout regions visually.
+- Sections sit inside `mx-[var(--frame)]` with a `border-t border-foreground/80` rule and a
+  12-col grid: `(label)` caption in cols 1–3, content in 4–12.
+- Work / experience are index rows separated by hairlines — no cards.
 
-### Visual Effects
-- **Texture:** `.bg-texture` applies a subtle "black-orchid" pattern to the body.
-- **Cursor:** Custom `.inverted-cursor` with `mix-blend-mode: difference` (Desktop only).
-- **Backgrounds:** Use of repeating linear gradients for grid-like background effects.
-
+### Motion (`src/scripts/motion.ts`)
+- Lenis + GSAP ScrollTrigger, driven by data attributes: `data-split="lines"` (masked line
+  reveal), `data-scrub` (word-by-word opacity), `data-fade`, `data-parallax`, `data-hero*`.
+- `ProjectExplorer.tsx` (R3F + drei `Html`): pinned hero where scroll flies a camera between
+  per-project point-cloud sculptures from `src/lib/sculptures.ts`. In-canvas components read
+  explorer state via small stores (not props) so `<Canvas>` never re-renders on stage change.
+  `SculptureStage` is the single-object version used on `/hire`.
+  Everything respects `prefers-reduced-motion`.

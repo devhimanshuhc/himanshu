@@ -160,9 +160,9 @@ const SpotifyActivity = () => {
           </div>
         ))}
       {error && (
-        <div className="flex items-start gap-2 text-red-500 text-xs">
+        <div className="flex items-start gap-2 px-4 py-6 text-xs text-muted-foreground" title={error}>
           <Icon icon={AlertCircle} className="mt-0" />
-          <span>{error}</span>
+          <span>spotify isn’t answering right now — check back in a bit.</span>
         </div>
       )}
       {!loading &&

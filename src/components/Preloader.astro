@@ -1,0 +1,26 @@
+<div
+  data-preloader
+  class="preloader void fixed inset-0 z-[80] hidden items-end justify-between p-[var(--frame)] [clip-path:inset(0%_0%_0%_0%)]"
+  aria-hidden="true"
+>
+  <span class="block overflow-hidden">
+    <span data-preloader-fade class="block text-4xl font-medium tracking-[-0.04em] tabular-nums md:text-6xl">
+      <span data-preloader-count>000</span>%
+    </span>
+  </span>
+  <span class="block overflow-hidden">
+    <span data-preloader-fade class="caption block text-muted-foreground">ansh.life — loading</span>
+  </span>
+  <span data-preloader-bar class="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-foreground/60"></span>
+</div>
+
+<style>
+  :global(html.js:not(.preloaded)) .preloader {
+    display: flex;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .preloader {
+      display: none !important;
+    }
+  }
+</style>

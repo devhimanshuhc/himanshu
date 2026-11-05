@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Zilla+Slab:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@1&display=swap");
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -34,150 +34,199 @@
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
-    --color-chart-1: var(--chart-1);
-    --color-chart-2: var(--chart-2);
-    --color-chart-3: var(--chart-3);
-    --color-chart-4: var(--chart-4);
-    --color-chart-5: var(--chart-5);
-    --color-sidebar: var(--sidebar);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-ring: var(--sidebar-ring);
 
     --color-surface: var(--secondary);
     --color-surface-foreground: var(--secondary-foreground);
-
     --color-gutter-edge: var(--input);
 
-    --font-zilla-slab: var(--font-zilla-slab);
-    --font-inter: var(--font-inter);
+    --color-body: var(--body);
+    --color-brand: var(--brand);
+
+    --font-sans: var(--font-geist);
+    --font-mono: var(--font-geist-mono);
+    --font-serif: var(--font-instrument);
+    /* legacy aliases so older class names still resolve to the new faces */
+    --font-inter: var(--font-geist);
+    --font-zilla-slab: var(--font-geist);
 }
 
+/* DESIGN.md — paper + void */
 :root {
-    --radius: 0.625rem;
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.141 0.005 285.823);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.141 0.005 285.823);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.141 0.005 285.823);
-    --primary: oklch(0.21 0.006 285.885);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.967 0.001 286.375);
-    --secondary-foreground: oklch(0.21 0.006 285.885);
-    --muted: oklch(0.967 0.001 286.375);
-    --muted-foreground: oklch(0.552 0.016 285.938);
-    --accent: oklch(0.967 0.001 286.375);
-    --accent-foreground: oklch(0.21 0.006 285.885);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.92 0.004 286.32);
-    --input: oklch(0.92 0.004 286.32);
-    --ring: oklch(0.705 0.015 286.067);
-    --chart-1: oklch(0.646 0.222 41.116);
-    --chart-2: oklch(0.6 0.118 184.704);
-    --chart-3: oklch(0.398 0.07 227.392);
-    --chart-4: oklch(0.828 0.189 84.429);
-    --chart-5: oklch(0.769 0.188 70.08);
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.141 0.005 285.823);
-    --sidebar-primary: oklch(0.21 0.006 285.885);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.967 0.001 286.375);
-    --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-    --sidebar-border: oklch(0.92 0.004 286.32);
-    --sidebar-ring: oklch(0.705 0.015 286.067);
+    --radius: 0.375rem;
+    --background: #edeae3;
+    --foreground: #141414;
+    --card: #f3f1ec;
+    --card-foreground: #141414;
+    --popover: #f3f1ec;
+    --popover-foreground: #141414;
+    --primary: #141414;
+    --primary-foreground: #edeae3;
+    --secondary: #e4e0d8;
+    --secondary-foreground: #141414;
+    --muted: #e4e0d8;
+    --muted-foreground: #8a867e;
+    --accent: #e4e0d8;
+    --accent-foreground: #141414;
+    --destructive: #c4321b;
+    --border: rgb(20 20 20 / 12%);
+    --input: rgb(20 20 20 / 16%);
+    --ring: rgb(20 20 20 / 45%);
+    --body: #55524c;
+    --brand: #e8853d;
 
-    --font-inter: Inter, monospace;
-    --font-zilla-slab: Zilla Slab, monospace;
+    --font-geist: "Geist", ui-sans-serif, system-ui, sans-serif;
+    --font-geist-mono: "Geist Mono", ui-monospace, monospace;
+    --font-instrument: "Instrument Serif", ui-serif, Georgia, serif;
+
+    --frame: 12px;
+    --nav-h: 56px;
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+    color-scheme: light;
 }
 
-.dark {
-    --background: oklch(0.141 0.005 285.823);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.21 0.006 285.885);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.21 0.006 285.885);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.92 0.004 286.32);
-    --primary-foreground: oklch(0.21 0.006 285.885);
-    --secondary: oklch(0.274 0.006 286.033);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.274 0.006 286.033);
-    --muted-foreground: oklch(0.705 0.015 286.067);
-    --accent: oklch(0.274 0.006 286.033);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.552 0.016 285.938);
-    --chart-1: oklch(0.488 0.243 264.376);
-    --chart-2: oklch(0.696 0.17 162.48);
-    --chart-3: oklch(0.769 0.188 70.08);
-    --chart-4: oklch(0.627 0.265 303.9);
-    --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.21 0.006 285.885);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.274 0.006 286.033);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.552 0.016 285.938);
+@media (min-width: 768px) {
+    :root {
+        --frame: 24px;
+        --nav-h: 72px;
+    }
+}
+
+/* the dark viewport / dark bands — tokens flip so children adapt */
+.void {
+    --background: #0b0b0c;
+    --foreground: #edeae3;
+    --card: #141416;
+    --primary: #edeae3;
+    --primary-foreground: #0b0b0c;
+    --secondary: #18181a;
+    --secondary-foreground: #edeae3;
+    --muted: #18181a;
+    --muted-foreground: #8d8a84;
+    --accent: #18181a;
+    --border: rgb(237 234 227 / 12%);
+    --input: rgb(237 234 227 / 16%);
+    --ring: rgb(237 234 227 / 50%);
+    --body: #b9b5ad;
+    background-color: var(--background);
+    color: var(--foreground);
+    color-scheme: dark;
 }
 
 @layer base {
     * {
         @apply border-border outline-ring/50;
     }
+    html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-tap-highlight-color: transparent;
+    }
+    @media (pointer: fine) {
+        html {
+            overscroll-behavior: none;
+        }
+    }
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground font-sans;
+        font-feature-settings: "ss01", "cv11";
+    }
+    a,
+    button {
+        touch-action: manipulation;
+    }
+    ::selection {
+        background: var(--foreground);
+        color: var(--background);
+    }
+    :focus-visible {
+        outline: 1.5px solid var(--foreground);
+        outline-offset: 3px;
     }
 }
 
+/* Lenis */
+html.lenis,
+html.lenis body {
+    height: auto;
+}
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+    overflow: clip;
+}
+
+/* mono caption used for every eyebrow / label */
+.caption {
+    font-family: var(--font-geist-mono);
+    font-size: 11px;
+    line-height: 16px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+@media (min-width: 768px) {
+    .caption {
+        font-size: 12px;
+    }
+}
+
+.accent {
+    font-family: var(--font-instrument);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+}
+
+/* masked line reveals */
+.split-line {
+    overflow: clip;
+    padding-bottom: 0.1em;
+    margin-bottom: -0.1em;
+}
+
+/* Hide reveal targets before JS animates them (no-JS and reduced-motion stay visible) */
+html.js:not(.reduced-motion) [data-split],
+html.js:not(.reduced-motion) [data-fade] {
+    visibility: hidden;
+}
+html.js:not(.reduced-motion) [data-hero-fade] {
+    opacity: 0;
+}
+
+/* explorer: title rises in from its mask, side panel fades up, on every project change */
+.explorer-title {
+    animation: title-in 0.9s var(--ease-out-expo) both;
+}
+.panel-in {
+    animation: panel-in 0.7s var(--ease-out-expo) both;
+}
+@keyframes title-in {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: none;
+    }
+}
+@keyframes panel-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .explorer-title,
+    .panel-in {
+        animation: none;
+    }
+}
+
+/* Kept for older markup */
 .bg-texture {
-    background-image: url("https://www.transparenttextures.com/patterns/black-orchid.png");
-}
-
-.inverted-cursor {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background-color: white;
-    position: fixed;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    mix-blend-mode: difference;
-    z-index: 9999;
-    transition-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
-    transition:
-        width 0.5s,
-        height 0.5s;
-}
-
-.inverted-cursor.grow {
-    width: 90px;
-    height: 90px;
-}
-
-@media (max-width: 768px) {
-    .inverted-cursor {
-        /* Hide the custom cursor element */
-        display: none;
-    }
-
-    body {
-        /* Restore the default system cursor */
-        cursor: default;
-    }
-}
-
-:root {
-    /* Common layout widths */
-    --width-gutter: 16px; /* Side gutter width */
-    --width-landing-container: 1024px; /* Maximum container width */
-    --header-height: 55px;
+    background-color: var(--background);
 }

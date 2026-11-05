@@ -1,0 +1,68 @@
+---
+import "../styles/global.css"
+
+import { ScrollProgress } from "@/components/ui/scroll-progress"
+import Nav from "@/components/Nav.astro"
+import Preloader from "@/components/Preloader.astro"
+import Contact from "@/components/Contact.astro"
+
+interface Props {
+  title: string
+  description?: string
+}
+
+const {
+  title,
+  description = "himanshu chauhan (ansh) — ai engineer and full stack developer shipping llms, rag and agents to production, plus the web and mobile apps on top.",
+} = Astro.props
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#edeae3" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <script is:inline>
+      // reveal targets start hidden only when JS runs; if the motion bundle
+      // never boots, drop the flag so content is never stuck invisible
+      document.documentElement.classList.add("js")
+      try {
+        if (sessionStorage.getItem("preloaded") === "1") document.documentElement.classList.add("preloaded")
+      } catch {}
+      setTimeout(() => {
+        if (!window.__motionReady) document.documentElement.classList.remove("js")
+      }, 4000)
+    </script>
+  </head>
+
+  <body class="overflow-x-clip">
+    <a
+      href="#content"
+      class="caption fixed left-3 top-3 z-[90] -translate-y-24 bg-foreground px-3 py-2 text-background focus-visible:translate-y-0"
+      >skip to content</a
+    >
+    <Preloader />
+    <ScrollProgress client:load className="bg-none bg-foreground h-px z-[65]" />
+
+    <Nav />
+    <main id="top">
+      <slot />
+    </main>
+    <Contact />
+
+    <script>
+      import "@/scripts/motion"
+    </script>
+  </body>
+</html>

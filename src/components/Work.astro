@@ -1,0 +1,91 @@
+---
+import { CONTENT } from "@/lib/content"
+
+const projects = CONTENT.projects
+const pad = (n: number) => String(n).padStart(2, "0")
+---
+
+<section id="work" class="mx-[var(--frame)] scroll-mt-[var(--nav-h)] border-t border-foreground/80 pt-6 pb-32 md:pb-48">
+  <div class="mb-16 grid gap-10 md:mb-24 md:grid-cols-12">
+    <p data-fade class="caption text-muted-foreground md:col-span-3">(selected work)</p>
+    <div class="md:col-span-9">
+      <h2 data-split="lines" class="text-5xl font-medium leading-none tracking-[-0.05em] md:text-7xl lg:text-8xl">
+        stuff i <span class="accent">made</span>
+      </h2>
+      <p data-fade class="mt-6 max-w-md text-pretty text-[15px] leading-relaxed text-body md:text-base">
+        from simple static sites to robust fullstack solutions — the ones i’m really proud of.
+      </p>
+    </div>
+  </div>
+
+  <div class="caption hidden grid-cols-12 gap-6 border-b border-border pb-3 text-muted-foreground md:grid" aria-hidden="true">
+    <span class="col-span-1">no.</span>
+    <span class="col-span-4">project</span>
+    <span class="col-span-3">category</span>
+    <span class="col-span-3">stack</span>
+    <span class="col-span-1 text-right">link</span>
+  </div>
+
+  <ol data-work-list>
+    {
+      projects.map((project, i) => {
+        const hasLink = project.link !== "#"
+        const hasSource = project.github !== "#"
+        const href = hasLink ? project.link : hasSource ? project.github : undefined
+        return (
+          <li data-fade class="group relative border-b border-border" data-preview={project.image}>
+            <a
+              href={href}
+              target={href ? "_blank" : undefined}
+              rel={href ? "noopener noreferrer" : undefined}
+              class="grid grid-cols-[2.5rem_1fr_auto] items-baseline gap-x-4 gap-y-2 py-6 md:grid-cols-12 md:gap-6 md:py-8"
+            >
+              <span class="caption text-muted-foreground md:col-span-1">{pad(i + 1)}</span>
+              <span class="text-3xl font-medium tracking-[-0.04em] transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:translate-x-3 md:col-span-4 md:text-5xl">
+                {project.label}
+              </span>
+              <span class="caption hidden text-body md:col-span-3 md:block">{project.category}</span>
+              <span class="caption col-start-2 text-muted-foreground md:col-span-3 md:col-start-auto">
+                {project.tech.join(" · ")}
+              </span>
+              <span class="caption col-start-3 row-start-1 text-right text-body md:col-span-1 md:col-start-12">
+                {hasLink ? "live ↗" : hasSource ? "code ↗" : "here"}
+              </span>
+              <span class="col-span-full col-start-2 max-w-xl text-pretty text-sm leading-relaxed text-body md:col-span-6 md:col-start-2">
+                {project.description}
+              </span>
+            </a>
+            {hasLink && hasSource && (
+              <a
+                href={project.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="caption absolute bottom-2 right-0 hidden py-2 text-muted-foreground hover:text-foreground md:block"
+              >
+                source ↗
+              </a>
+            )}
+          </li>
+        )
+      })
+    }
+  </ol>
+
+  <!-- floating preview that follows the pointer over the list (fine pointers only) -->
+  <div
+    data-work-preview
+    class="pointer-events-none fixed left-0 top-0 z-40 hidden aspect-[4/3] w-[22rem] overflow-hidden opacity-0 [@media(pointer:fine)]:block"
+    aria-hidden="true"
+  >
+    <img data-work-preview-img alt="" class="h-full w-full object-cover" />
+  </div>
+
+  <a
+    href="https://github.com/himanshu-dev-codes"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="caption mt-8 inline-flex items-center gap-2 text-body hover:text-foreground"
+  >
+    more on github ↗
+  </a>
+</section>

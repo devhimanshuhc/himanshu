@@ -15,7 +15,7 @@ export default defineConfig({
   integrations: [react()],
   adapter: vercel(),
   redirects: {
-    "/cv": "/resume-hc.pdf",
+    "/cv": "https://drive.google.com/file/d/1j7_bh8uG6rYlVssZpsvVDMz9-WrMLx18/view?usp=drive_link",
     "/pf": "/me"
   }
 });
