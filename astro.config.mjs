@@ -8,6 +8,10 @@ import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
+  // inline the (small, ~11 KB gzipped) stylesheet: saves a render-blocking round trip
+  build: {
+    inlineStylesheets: "always",
+  },
   vite: {
       plugins: [tailwindcss()]
     },

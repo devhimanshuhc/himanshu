@@ -113,8 +113,12 @@ file lives in `docs/design/vercel.DESIGN.md`). Read it before any UI change.
 ### Motion (`src/scripts/motion.ts`)
 - Lenis + GSAP ScrollTrigger, driven by data attributes: `data-split="lines"` (masked line
   reveal), `data-scrub` (word-by-word opacity), `data-fade`, `data-parallax`, `data-hero*`.
-- `ProjectExplorer.tsx` (R3F + drei `Html`): pinned hero where scroll flies a camera between
-  per-project point-cloud sculptures from `src/lib/sculptures.ts`. In-canvas components read
-  explorer state via small stores (not props) so `<Canvas>` never re-renders on stage change.
-  `SculptureStage` is the single-object version used on `/hire`.
+- Hero explorer is split for performance: `ProjectExplorer.tsx` is the server-rendered shell
+  (title, ruler, side panel; no three.js), and `ExplorerScene.tsx` holds all R3F/three code and is
+  `React.lazy`-loaded once the page is idle. Shared state/types live in `src/lib/explorer.ts`.
+  Scroll flies a camera between per-project point-cloud models from `src/lib/sculptures.ts`;
+  in-canvas components read state via small stores (not props) so `<Canvas>` never re-renders.
+  `SculptureStage` (in `ExplorerScene.tsx`) is the single-object version used on `/hire`.
+- Fonts are self-hosted via `@fontsource/*` (no Google Fonts request). Don't add `motion`/framer
+  back for small effects — progress bar and counters are GSAP in `motion.ts`.
   Everything respects `prefers-reduced-motion`.

@@ -32,9 +32,11 @@ const pad = (n: number) => String(n).padStart(2, "0")
         const hasLink = project.link !== "#"
         const hasSource = project.github !== "#"
         const href = hasLink ? project.link : hasSource ? project.github : undefined
+        // client work with nothing public renders as a plain row, not a dead link
+        const Row = href ? "a" : "div"
         return (
           <li data-fade class="group relative border-b border-border" data-preview={project.image}>
-            <a
+            <Row
               href={href}
               target={href ? "_blank" : undefined}
               rel={href ? "noopener noreferrer" : undefined}
@@ -49,12 +51,12 @@ const pad = (n: number) => String(n).padStart(2, "0")
                 {project.tech.join(" · ")}
               </span>
               <span class="caption col-start-3 row-start-1 text-right text-body md:col-span-1 md:col-start-12">
-                {hasLink ? "live ↗" : hasSource ? "code ↗" : "here"}
+                {hasLink ? "live ↗" : hasSource ? "code ↗" : "private"}
               </span>
               <span class="col-span-full col-start-2 max-w-xl text-pretty text-sm leading-relaxed text-body md:col-span-6 md:col-start-2">
                 {project.description}
               </span>
-            </a>
+            </Row>
             {hasLink && hasSource && (
               <a
                 href={project.github}

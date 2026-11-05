@@ -1,7 +1,6 @@
 ---
 import "../styles/global.css"
 
-import { ScrollProgress } from "@/components/ui/scroll-progress"
 import Nav from "@/components/Nav.astro"
 import Preloader from "@/components/Preloader.astro"
 import Contact from "@/components/Contact.astro"
@@ -31,8 +30,7 @@ const {
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <title>{title}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="canonical" href={new URL(Astro.url.pathname, "https://www.ansh.life")} />
     <script is:inline>
       // reveal targets start hidden only when JS runs; if the motion bundle
       // never boots, drop the flag so content is never stuck invisible
@@ -53,7 +51,7 @@ const {
       >skip to content</a
     >
     <Preloader />
-    <ScrollProgress client:load className="bg-none bg-foreground h-px z-[65]" />
+    <div data-progress class="fixed inset-x-0 top-0 z-[65] h-px origin-left scale-x-0 bg-foreground" aria-hidden="true"></div>
 
     <Nav />
     <main id="top">

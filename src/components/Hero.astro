@@ -2,12 +2,5 @@
 import { ProjectExplorer } from "@/components/ProjectExplorer"
 ---
 
-<ProjectExplorer client:only="react">
-  <!-- shown until the explorer hydrates: same frame, so nothing jumps -->
-  <section slot="fallback" class="flex h-svh flex-col px-[var(--frame)] pb-[var(--frame)] pt-[var(--nav-h)]">
-    <h1 class="relative z-10 -mb-[0.09em] pt-3 text-[11.5vw] font-semibold leading-[0.84] tracking-[-0.065em] md:pt-5 md:text-[min(9vw,10.5rem)]">
-      Himanshu Chauhan
-    </h1>
-    <div class="void min-h-0 flex-1"></div>
-  </section>
-</ProjectExplorer>
+<!-- server-rendered so the title and panel paint immediately; the 3D scene loads lazily -->
+<ProjectExplorer client:load />

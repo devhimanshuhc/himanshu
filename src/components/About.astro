@@ -1,5 +1,4 @@
 ---
-import { NumberTicker } from "@/components/ui/number-ticker"
 import { CONTENT } from "@/lib/content"
 ---
 
@@ -37,7 +36,7 @@ import { CONTENT } from "@/lib/content"
         >
           <dt class="caption order-2 text-muted-foreground md:order-2">{stat.label}</dt>
           <dd class="order-1 text-5xl font-medium tracking-[-0.05em] tabular-nums md:text-7xl">
-            <NumberTicker client:visible value={stat.value} className="tracking-[-0.05em] text-foreground" />{stat.suffix}
+            <span data-count={stat.value}>{stat.value}</span>{stat.suffix}
           </dd>
         </div>
       ))

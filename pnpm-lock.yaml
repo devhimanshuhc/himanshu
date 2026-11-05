@@ -20,6 +20,15 @@ importers:
       '@astrojs/vercel':
         specifier: ^9.0.5
         version: 9.0.5(astro@5.11.2(@types/node@24.0.14)(jiti@2.4.2)(lightningcss@1.30.1)(rollup@4.45.1)(typescript@5.9.3)(yaml@2.8.2))(react@19.1.0)(rollup@4.45.1)
+      '@fontsource/geist':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/geist-mono':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/instrument-serif':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.1.14
         version: 2.1.15(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -71,9 +80,6 @@ importers:
       lucide-react:
         specifier: ^0.507.0
         version: 0.507.0(react@19.1.0)
-      motion:
-        specifier: ^14.9.1
-        version: 14.9.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react:
         specifier: ^19.1.0
         version: 19.1.0
@@ -454,6 +460,15 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
+
+  '@fontsource/geist-mono@5.3.0':
+    resolution: {integrity: sha512-UtJ1BBBCVpMYdIcW7nEB45UAoAw5M53ZXs2t0ciPW+IokuAAIc56M8+kW5tXbRJCTpDw4XTtU7proT6NdQAHTg==}
+
+  '@fontsource/geist@5.3.0':
+    resolution: {integrity: sha512-u03ftlfVwb05uijq2jGDJ03/HKGqMKaNFk7KOhkpBUex8+BhrAOfMs/XciJ2UUNUX9fEsZbZQld/RWMA2oFU7g==}
+
+  '@fontsource/instrument-serif@5.3.0':
+    resolution: {integrity: sha512-mDiaIg0u67sYV59fie92Wz4sM8UiVlbL7fLxnFPCKkX15DMASEnQTREbaP5S5/3DCcsoAOcQ0sV9E4AeY4QqYQ==}
 
   '@img/sharp-darwin-arm64@0.33.5':
     resolution: {integrity: sha512-UT4p+iz/2H4twwAoLCqfA9UH5pI6DggwKEGuaPy7nCVQ8ZsiY5PIcrRvD1DzuY3qYL07NtIQcWnBSY/heikIFQ==}
@@ -1797,20 +1812,6 @@ packages:
     resolution: {integrity: sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==}
     engines: {node: '>=14'}
 
-  framer-motion@14.9.1:
-    resolution: {integrity: sha512-WDWNT2ixHdmpvGg02BZWI/SWwRYzPiMUf4aIkTBgrxxD8RYFdZO3fCM4pnLMo6j8mUpj0+BuJRHQBChI4v3Anw==}
-    peerDependencies:
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
-      remix: ^3.1.0
-    peerDependenciesMeta:
-      react:
-        optional: true
-      react-dom:
-        optional: true
-      remix:
-        optional: true
-
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -2335,26 +2336,6 @@ packages:
     resolution: {integrity: sha512-+NsyUUAZDmo6YVHzL/stxSu3t9YS1iljliy3BSDrXJ/dkn1KYdmtZODGGjLcc9XLgVVpH4KshHB8XmZgMhaBXg==}
     engines: {node: '>=10'}
     hasBin: true
-
-  motion-dom@14.9.1:
-    resolution: {integrity: sha512-2eCCGXH2Yv09lM8GHK3TdfChrcvHxzVY19LD9VraoHEaQl5+PuGnTNnmJaBAR+5MdxUVdsLFXygFJjR9RwRSxw==}
-
-  motion-utils@14.7.0:
-    resolution: {integrity: sha512-woO0/Nb7ys75f94fjvQi/6leiHGvZUYkeHUPEZ3vxsV+9OpEVhkxp01x8MlRwX0zt31EqgXsKDAoBoJLC148Tw==}
-
-  motion@14.9.1:
-    resolution: {integrity: sha512-u58zTNOs6vefAwvPncTJ8vkQm+P08V4+mhNgap8p/mFZjl8+gWp7SG4cMTamebVSgpX6PcDtqzWpZngqKcfd7A==}
-    peerDependencies:
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
-      remix: ^3.1.0
-    peerDependenciesMeta:
-      react:
-        optional: true
-      react-dom:
-        optional: true
-      remix:
-        optional: true
 
   mrmime@2.0.1:
     resolution: {integrity: sha512-Y3wQdFg2Va6etvQ5I82yUhGdsKrcYox6p7FfL1LbK2J4V01F9TGlepTIhnK24t7koZibmg82KGglhA1XK5IsLQ==}
@@ -3721,6 +3702,12 @@ snapshots:
       react-dom: 19.1.0(react@19.1.0)
 
   '@floating-ui/utils@0.2.10': {}
+
+  '@fontsource/geist-mono@5.3.0': {}
+
+  '@fontsource/geist@5.3.0': {}
+
+  '@fontsource/instrument-serif@5.3.0': {}
 
   '@img/sharp-darwin-arm64@0.33.5':
     optionalDependencies:
@@ -5132,15 +5119,6 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  framer-motion@14.9.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
-    dependencies:
-      motion-dom: 14.9.1
-      motion-utils: 14.7.0
-      tslib: 2.8.1
-    optionalDependencies:
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
-
   fsevents@2.3.3:
     optional: true
 
@@ -5961,20 +5939,6 @@ snapshots:
       minipass: 7.1.2
 
   mkdirp@3.0.1: {}
-
-  motion-dom@14.9.1:
-    dependencies:
-      motion-utils: 14.7.0
-
-  motion-utils@14.7.0: {}
-
-  motion@14.9.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
-    dependencies:
-      framer-motion: 14.9.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      tslib: 2.8.1
-    optionalDependencies:
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
 
   mrmime@2.0.1: {}
 

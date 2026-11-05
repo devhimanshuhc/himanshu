@@ -95,13 +95,13 @@ function runPreloader(onReveal: () => void) {
     })
     .to(progress, {
       v: 100,
-      duration: 1.6,
+      duration: 1.1,
       ease: "power2.inOut",
       onUpdate: () => {
         if (count) count.textContent = String(Math.round(progress.v)).padStart(3, "0")
       },
     })
-    .to(bar, { scaleX: 1, duration: 1.6, ease: "power2.inOut" }, 0)
+    .to(bar, { scaleX: 1, duration: 1.1, ease: "power2.inOut" }, 0)
     .to($$("[data-preloader-fade]", el), { yPercent: -110, duration: 0.5, ease: "power3.in", stagger: 0.04 })
     .to(el, { clipPath: "inset(0% 0% 100% 0%)", duration: 1, ease: "expo.inOut" }, "-=0.1")
     .call(onReveal, [], "-=0.55")
@@ -124,6 +124,7 @@ function initSplits() {
       mask: "lines",
       linesClass: "split-line",
       autoSplit: true,
+      aria: "none",
       onSplit(self) {
         if (isHero) {
           gsap.set(self.lines, { yPercent: 105 })
@@ -148,6 +149,7 @@ function initSplits() {
     SplitText.create(el, {
       type: "words",
       autoSplit: true,
+      aria: "none",
       onSplit(self) {
         return gsap.fromTo(
           self.words,
@@ -156,7 +158,10 @@ function initSplits() {
             opacity: 1,
             ease: "none",
             stagger: 0.1,
-            scrollTrigger: { trigger: el, start: "top 80%", end: "bottom 55%", scrub: true },
+            // don't pre-dim off-screen text: words keep full contrast until the
+            // paragraph enters the viewport, then light up as you read
+            immediateRender: false,
+            scrollTrigger: { trigger: el, start: "top bottom", end: "bottom 55%", scrub: true },
           },
         )
       },
@@ -276,11 +281,37 @@ function closeMenu() {
   const toggle = $("[data-menu-toggle]")
   if (!menu || menu.dataset.open !== "true") return
   menu.dataset.open = "false"
+  menu.inert = true
   toggle?.setAttribute("aria-expanded", "false")
   lenis?.start()
 }
 
 function initChrome() {
+  const progress = $("[data-progress]")
+  if (progress) {
+    const setProgress = gsap.quickSetter(progress, "scaleX")
+    ScrollTrigger.create({ start: 0, end: "max", onUpdate: (self) => setProgress(self.progress) })
+  }
+
+  $$("[data-count]").forEach((el) => {
+    const target = Number(el.dataset.count)
+    if (reduced || !Number.isFinite(target)) return
+    const value = { v: 0 }
+    el.textContent = "0"
+    ScrollTrigger.create({
+      trigger: el,
+      start: "top 92%",
+      once: true,
+      onEnter: () =>
+        gsap.to(value, {
+          v: target,
+          duration: 1.6,
+          ease: "power3.out",
+          onUpdate: () => (el.textContent = String(Math.round(value.v))),
+        }),
+    })
+  })
+
   const nav = $("[data-nav]")
   if (nav) {
     ScrollTrigger.create({
@@ -298,6 +329,7 @@ function initChrome() {
     if (!menu) return
     const open = menu.dataset.open !== "true"
     menu.dataset.open = String(open)
+    menu.inert = !open
     toggle.setAttribute("aria-expanded", String(open))
     if (open) lenis?.stop()
     else lenis?.start()
