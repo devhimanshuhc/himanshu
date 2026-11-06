@@ -247,6 +247,9 @@ export function ProjectExplorer() {
                     {current.category} · {current.tech.join(", ")}
                   </p>
                   <p className="flex gap-4 text-[12px]">
+                    <a href={`/projects/${current.key}/`} className="font-medium underline-offset-4 hover:underline">
+                      Read more →
+                    </a>
                     {current.link !== "#" && (
                       <a href={current.link} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline">
                         Live site ↗

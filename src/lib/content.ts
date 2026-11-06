@@ -170,14 +170,14 @@ export const CONTENT = {
     { label: "github", href: "https://github.com/himanshu-dev-codes" },
     { label: "linkedin", href: "https://linkedin.com/in/devhimanshuhc" },
     { label: "email", href: "mailto:himanshu.chauhan07@icloud.com" },
-    { label: "resumé", href: "https://drive.google.com/file/d/1j7_bh8uG6rYlVssZpsvVDMz9-WrMLx18/view?usp=drive_link" },
+    { label: "resumé", href: "/resume/" },
   ],
   projects: [
     {
       key: "retro",
       label: "Retro",
       description:
-        "An actor-based multi-agent research system. Agents run as isolated BullMQ workers and write cited reports; crashed steps resume exactly once and failed jobs replay.",
+        "An actor-based multi-agent research system. Agents run as isolated BullMQ workers and write cited reports; a crashed step resumes without a duplicate report, and failed jobs replay.",
       image: "/projects/retro.jpg",
       category: "Multi-agent AI",
       tech: ["TypeScript", "BullMQ", "Redis", "LLM agents"],

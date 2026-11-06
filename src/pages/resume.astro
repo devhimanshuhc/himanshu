@@ -1,0 +1,255 @@
+---
+import Site from "@/layouts/Site.astro"
+import { inline, RESUME as R } from "@/lib/resume"
+---
+
+<Site title="resume — ansh.life" description="himanshu chauhan, ai engineer: experience, projects and skills. download as pdf.">
+  <div class="mx-[var(--frame)] mt-[calc(var(--nav-h)+2rem)] pt-6 pb-32 print:m-0 print:p-0">
+    <div class="grid gap-10 md:grid-cols-12 print:hidden">
+      <p class="caption text-muted-foreground md:col-span-3">(resume)</p>
+      <div class="md:col-span-9">
+        <h1 class="text-5xl font-medium leading-none tracking-[-0.05em] md:text-7xl">
+          the <span class="accent">paper</span> version.
+        </h1>
+        <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <a
+            href="/resume.pdf"
+            download="himanshu-chauhan-resume.pdf"
+            class="caption inline-flex items-center gap-2 bg-foreground px-4 py-3 text-background transition-opacity hover:opacity-80"
+          >
+            download pdf ↓
+          </a>
+          <span class="caption text-muted-foreground">updated {R.updated}</span>
+        </div>
+      </div>
+    </div>
+
+    <article class="resume mt-16 border-t border-foreground/80 pt-10 md:mt-24 md:grid md:grid-cols-12 md:gap-10">
+      <div class="md:col-span-9 md:col-start-4">
+        <header>
+          <h2 class="text-3xl font-medium tracking-[-0.04em] md:text-4xl">{R.name}</h2>
+          <p class="mt-1 text-lg text-body">{R.headline}</p>
+          <p class="r-contact mt-4 flex flex-wrap gap-x-2 text-[14px] text-body">
+            {
+              R.contact.map((c, i) => (
+                <>
+                  {i > 0 && <span aria-hidden="true">|</span>}
+                  <a href={c.href} class="underline-offset-4 hover:underline">
+                    {c.label}
+                  </a>
+                </>
+              ))
+            }
+          </p>
+        </header>
+
+        <section>
+          <h3>summary</h3>
+          <p class="r-text" set:html={inline(R.summary)} />
+        </section>
+
+        <section>
+          <h3>experience</h3>
+          {
+            R.experience.map((job) => (
+              <div class="r-job">
+                <div class="r-row">
+                  <p>
+                    <strong class="text-[17px] font-medium">{job.company}</strong>
+                    <span class="text-muted-foreground"> | {job.location}</span>
+                  </p>
+                  <p class="r-dates">{job.dates}</p>
+                </div>
+                {job.note && <p class="r-note" set:html={inline(job.note)} />}
+                {job.roles.map((role) => (
+                  <div class="r-role">
+                    {(job.roles.length > 1 || role.title) && (
+                      <div class="r-row">
+                        <p class="font-medium">{role.title}</p>
+                        {job.roles.length > 1 && <p class="r-dates">{role.dates}</p>}
+                      </div>
+                    )}
+                    <ul>
+                      {role.bullets.map((b) => (
+                        <li set:html={inline(b)} />
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            ))
+          }
+        </section>
+
+        <section>
+          <h3>projects</h3>
+          <ul>
+            {R.projects.map((p) => <li set:html={inline(p)} />)}
+          </ul>
+        </section>
+
+        <section>
+          <h3>skills</h3>
+          <ul class="r-skills">
+            {
+              R.skills.map((s) => (
+                <li>
+                  <strong>{s.label}:</strong> {s.items}
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+      </div>
+    </article>
+  </div>
+</Site>
+
+<style is:global>
+  .resume section {
+    margin-top: 2.5rem;
+  }
+  .resume h3 {
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .resume .r-text,
+  .resume li {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--body);
+    text-wrap: pretty;
+  }
+  .resume strong {
+    font-weight: 500;
+    color: var(--foreground);
+  }
+  .resume li a,
+  .resume .r-text a {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  .resume ul {
+    list-style: disc;
+    padding-left: 1.1rem;
+  }
+  .resume ul li + li {
+    margin-top: 0.35rem;
+  }
+  .resume ul.r-skills {
+    list-style: none;
+    padding-left: 0;
+  }
+  .resume .r-job + .r-job {
+    margin-top: 1.75rem;
+  }
+  .resume .r-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    column-gap: 1rem;
+  }
+  .resume .r-dates {
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
+    font-size: 12px;
+    color: var(--muted-foreground);
+    font-variant-numeric: tabular-nums;
+  }
+  .resume .r-note {
+    margin-top: 0.15rem;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--muted-foreground);
+  }
+  .resume .r-role {
+    margin-top: 0.85rem;
+  }
+  .resume .r-role > ul {
+    margin-top: 0.4rem;
+  }
+
+  /* print: just the sheet, on white A4. `pnpm resume:pdf` prints this. */
+  @page {
+    size: A4;
+    margin: 10mm 12mm;
+  }
+  @media print {
+    html,
+    body {
+      background: #fff !important;
+    }
+    body > *:not(main),
+    [data-nav],
+    footer {
+      display: none !important;
+    }
+    .resume {
+      display: block !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      color: #141414;
+    }
+    .resume section {
+      margin-top: 8pt;
+      break-inside: auto;
+    }
+    .resume .r-job,
+    .resume li {
+      break-inside: avoid;
+    }
+    .resume header h2 {
+      font-size: 21pt;
+    }
+    .resume header p {
+      font-size: 10.5pt;
+    }
+    .resume .r-contact {
+      margin-top: 4pt;
+      font-size: 9pt !important;
+    }
+    .resume h3 {
+      font-size: 8pt;
+      margin-bottom: 5pt;
+      padding-bottom: 3pt;
+      color: #555;
+    }
+    .resume .r-text,
+    .resume li {
+      font-size: 9pt;
+      line-height: 1.38;
+      color: #2a2a2a;
+    }
+    .resume ul li + li {
+      margin-top: 1pt;
+    }
+    .resume .r-job + .r-job {
+      margin-top: 6pt;
+    }
+    .resume .r-role {
+      margin-top: 4pt;
+    }
+    .resume .r-role > ul {
+      margin-top: 2pt;
+    }
+    .resume .r-row strong {
+      font-size: 11pt;
+    }
+    .resume .r-row p,
+    .resume .r-dates {
+      font-size: 9.5pt;
+    }
+    .resume .r-note {
+      font-size: 8.5pt;
+    }
+  }
+</style>

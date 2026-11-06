@@ -1,0 +1,328 @@
+---
+import { getEntry, render } from "astro:content"
+import Site from "@/layouts/Site.astro"
+import { formatDate } from "@/lib/blog"
+import { getProjects, host, type Project } from "@/lib/projects"
+
+export async function getStaticPaths() {
+  const projects = await getProjects()
+  return projects.map((project, i) => ({
+    params: { slug: project.id },
+    props: { project, prev: projects[i - 1] ?? null, next: projects[i + 1] ?? null },
+  }))
+}
+
+interface Props {
+  project: Project
+  prev: Project | null
+  next: Project | null
+}
+
+const { project, prev, next } = Astro.props
+const d = project.data
+const { Content, headings } = await render(project)
+const toc = headings.filter((h) => h.depth === 2)
+const posts = (await Promise.all(d.related.map((id) => getEntry("blog", id)))).filter((p) => p !== undefined)
+
+// reading depth: 1 = 30 sec, 2 = 3 min, 3 = deep dive
+const depths = [
+  { value: "1", label: "30 sec" },
+  { value: "2", label: "3 min" },
+  { value: "3", label: "deep dive" },
+]
+---
+
+<Site title={`${d.title}: ${d.tagline} — ansh.life`} description={d.summary}>
+  <div data-depth="3" class="project mx-[var(--frame)] mt-[calc(var(--nav-h)+2rem)] pt-6 pb-32">
+    <script is:inline>
+      // set the remembered depth before the sections below are parsed, so nothing flashes
+      ;(function (el) {
+        var v = "1"
+        try {
+          v = localStorage.getItem("depth") || "1"
+        } catch {}
+        el.setAttribute("data-depth", v)
+      })(document.currentScript.parentElement)
+    </script>
+
+    <div class="grid gap-12 lg:grid-cols-12">
+      <aside class="lg:col-span-3">
+        <div class="lg:sticky lg:top-[calc(var(--nav-h)+2rem)]">
+          <a href="/projects/" class="caption text-muted-foreground hover:text-foreground">← all projects</a>
+
+          <dl class="mt-10 grid grid-cols-2 gap-x-6 gap-y-5 text-[14px] lg:grid-cols-1">
+            <div>
+              <dt class="caption text-muted-foreground">role</dt>
+              <dd class="mt-1">{d.role}</dd>
+            </div>
+            <div>
+              <dt class="caption text-muted-foreground">timeline</dt>
+              <dd class="mt-1">{d.timeline}</dd>
+            </div>
+            <div>
+              <dt class="caption text-muted-foreground">context</dt>
+              <dd class="mt-1">{d.kicker}</dd>
+            </div>
+            {
+              (d.links.live || d.links.source) && (
+                <div>
+                  <dt class="caption text-muted-foreground">links</dt>
+                  <dd class="mt-1 flex flex-col gap-1">
+                    {d.links.live && (
+                      <a href={d.links.live} target="_blank" rel="noopener noreferrer" class="underline-offset-4 hover:underline">
+                        {host(d.links.live)} ↗
+                      </a>
+                    )}
+                    {d.links.source && (
+                      <a href={d.links.source} target="_blank" rel="noopener noreferrer" class="underline-offset-4 hover:underline">
+                        source ↗
+                      </a>
+                    )}
+                  </dd>
+                </div>
+              )
+            }
+            <div class="col-span-2 lg:col-span-1">
+              <dt class="caption text-muted-foreground">stack</dt>
+              <dd class="mt-2 flex flex-wrap gap-1.5">
+                {d.stack.map((s) => <span class="border border-border px-2 py-0.5 text-[12px] text-body">{s}</span>)}
+              </dd>
+            </div>
+          </dl>
+
+          {
+            toc.length > 0 && (
+              <nav aria-label="on this page" class="d3 mt-10 hidden lg:block">
+                <p class="caption mb-3 text-muted-foreground">the details</p>
+                <ol class="space-y-2 border-l border-border text-[13px] leading-snug">
+                  {toc.map((h) => (
+                    <li class="pl-4">
+                      <a href={`#${h.slug}`} class="text-body transition-colors hover:text-foreground">
+                        {h.text}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            )
+          }
+        </div>
+      </aside>
+
+      <article class="min-w-0 lg:col-span-8 xl:col-span-7">
+        <header>
+          <h1 class="text-5xl font-medium leading-[0.98] tracking-[-0.05em] text-balance md:text-7xl">
+            {d.title}
+            <span class="mt-3 block text-2xl leading-tight tracking-[-0.03em] text-muted-foreground md:text-4xl">
+              {d.tagline}
+            </span>
+          </h1>
+          <p class="mt-8 max-w-2xl text-pretty text-lg leading-relaxed text-body md:text-xl">{d.summary}</p>
+        </header>
+
+        <div role="radiogroup" aria-label="reading depth" class="caption mt-12 inline-flex border border-foreground/80" data-depth-switch>
+          {
+            depths.map((o) => (
+              <button
+                type="button"
+                role="radio"
+                data-value={o.value}
+                class="px-4 py-2.5 transition-colors aria-checked:bg-foreground aria-checked:text-background hover:bg-foreground/5 aria-checked:hover:bg-foreground"
+              >
+                {o.label}
+              </button>
+            ))
+          }
+        </div>
+
+        <section class="mt-14" aria-labelledby="tldr">
+          <h2 id="tldr" class="caption text-muted-foreground">tl;dr</h2>
+          <dl class="mt-5 divide-y divide-border border-y border-border">
+            {
+              (["problem", "built", "outcome"] as const).map((k) => (
+                <div class="grid gap-2 py-5 sm:grid-cols-[7rem_1fr]">
+                  <dt class="caption pt-1 text-muted-foreground">{k}</dt>
+                  <dd class="text-pretty leading-relaxed">{d.tldr[k]}</dd>
+                </div>
+              ))
+            }
+          </dl>
+
+          {
+            d.stats.length > 0 && (
+              <ul class="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
+                {d.stats.map((s) => (
+                  <li>
+                    <span class="block text-4xl font-medium tracking-[-0.05em] tabular-nums md:text-5xl">{s.value}</span>
+                    <span class="mt-2 block text-[13px] leading-snug text-body">{s.label}</span>
+                  </li>
+                ))}
+              </ul>
+            )
+          }
+        </section>
+
+        {
+          d.architecture.length > 0 && (
+            <section class="d2 mt-20" aria-labelledby="architecture">
+              <h2 id="architecture" class="text-3xl font-medium tracking-[-0.04em] md:text-4xl">
+                architecture
+              </h2>
+              <p class="mt-2 text-[14px] text-muted-foreground">select a box to see what it does.</p>
+              <div data-arch class="mt-6 border border-border">
+                <div class="grid grid-cols-2 gap-px bg-border sm:grid-cols-3">
+                  {d.architecture.map((b, i) => (
+                    <button
+                      type="button"
+                      data-i={i}
+                      aria-pressed={i === 0 ? "true" : "false"}
+                      class="flex min-h-20 items-end bg-background p-4 text-left text-[15px] font-medium transition-colors hover:bg-foreground/[0.04] aria-pressed:bg-foreground aria-pressed:text-background"
+                    >
+                      <span>
+                        <span class="caption mb-1 block opacity-60">{String(i + 1).padStart(2, "0")}</span>
+                        {b.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <div class="border-t border-border p-5" aria-live="polite">
+                  {d.architecture.map((b, i) => (
+                    <p data-panel={i} hidden={i !== 0} class="text-pretty leading-relaxed">
+                      <strong class="font-medium">{b.name}.</strong> <span class="text-body">{b.desc}</span>
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )
+        }
+
+        {
+          d.decisions.length > 0 && (
+            <section class="d2 mt-20" aria-labelledby="decisions">
+              <h2 id="decisions" class="text-3xl font-medium tracking-[-0.04em] md:text-4xl">
+                key decisions
+              </h2>
+              <ol class="mt-8 border-t border-border">
+                {d.decisions.map((x, i) => (
+                  <li class="grid gap-3 border-b border-border py-7 sm:grid-cols-[3rem_1fr]">
+                    <span class="caption pt-1.5 text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                    <div>
+                      <h3 class="text-xl font-medium tracking-[-0.02em]">{x.title}</h3>
+                      <p class="mt-3 text-pretty leading-relaxed text-body">{x.problem}</p>
+                      <p class="mt-3 text-pretty leading-relaxed">{x.decision}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )
+        }
+
+        <section class="d3 mt-20" aria-label="the details">
+          <p class="caption mb-2 text-muted-foreground">the details</p>
+          <div class="post"><Content /></div>
+        </section>
+
+        <p class="more mt-14 border-y border-border py-5 text-[15px] text-body">
+          that's the short version.
+          <button type="button" data-more class="ml-1 text-foreground underline underline-offset-4 hover:opacity-70"></button>
+        </p>
+
+        <footer class="mt-20 border-t border-border pt-8">
+          {
+            posts.length > 0 && (
+              <div class="mb-14">
+                <h2 class="caption mb-4 text-muted-foreground">related writing</h2>
+                <ul class="border-t border-border">
+                  {posts.map((p) => (
+                    <li class="border-b border-border">
+                      <a href={`/blog/${p.id}/`} class="flex items-baseline justify-between gap-6 py-4 hover:opacity-70">
+                        <span class="font-medium">{p.data.title}</span>
+                        <span class="caption shrink-0 text-muted-foreground">{formatDate(p.data.date)}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          }
+
+          <nav class="grid gap-6 sm:grid-cols-2" aria-label="more projects">
+            {
+              prev ? (
+                <a href={`/projects/${prev.id}/`} class="group">
+                  <span class="caption text-muted-foreground">← previous</span>
+                  <span class="mt-1 block font-medium group-hover:opacity-70">{prev.data.title}</span>
+                </a>
+              ) : (
+                <span />
+              )
+            }
+            {
+              next && (
+                <a href={`/projects/${next.id}/`} class="group sm:text-right">
+                  <span class="caption text-muted-foreground">next →</span>
+                  <span class="mt-1 block font-medium group-hover:opacity-70">{next.data.title}</span>
+                </a>
+              )
+            }
+          </nav>
+        </footer>
+      </article>
+    </div>
+  </div>
+</Site>
+
+<style>
+  [data-depth="1"] .d2,
+  [data-depth="1"] .d3,
+  [data-depth="2"] .d3,
+  [data-depth="3"] .more {
+    display: none;
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>("[data-depth]")
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>("[data-depth-switch] [role=radio]")]
+  const more = document.querySelector<HTMLButtonElement>("[data-more]")
+  const nextLabel: Record<string, string> = { "1": "switch to 3 min for the architecture and decisions.", "2": "switch to the deep dive." }
+
+  function setDepth(v: string, focus = false) {
+    if (!root) return
+    root.dataset.depth = v
+    try {
+      localStorage.setItem("depth", v)
+    } catch {}
+    for (const b of buttons) {
+      const on = b.dataset.value === v
+      b.setAttribute("aria-checked", String(on))
+      b.tabIndex = on ? 0 : -1
+      if (on && focus) b.focus()
+    }
+    if (more) more.textContent = nextLabel[v] ?? ""
+  }
+
+  setDepth(root?.dataset.depth ?? "1")
+  buttons.forEach((b, i) => {
+    b.addEventListener("click", () => setDepth(b.dataset.value!))
+    // radio group keys: arrows move and select
+    b.addEventListener("keydown", (e) => {
+      const step = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0
+      if (!step) return
+      e.preventDefault()
+      setDepth(buttons[(i + step + buttons.length) % buttons.length].dataset.value!, true)
+    })
+  })
+  more?.addEventListener("click", () => setDepth(String(Math.min(3, Number(root?.dataset.depth ?? 1) + 1))))
+
+  // architecture map: one box selected at a time, its description below
+  const arch = document.querySelector("[data-arch]")
+  arch?.addEventListener("click", (e) => {
+    const box = (e.target as HTMLElement).closest<HTMLButtonElement>("button[data-i]")
+    if (!box) return
+    for (const b of arch.querySelectorAll("button[data-i]")) b.setAttribute("aria-pressed", String(b === box))
+    for (const p of arch.querySelectorAll<HTMLElement>("[data-panel]")) p.hidden = p.dataset.panel !== box.dataset.i
+  })
+</script>

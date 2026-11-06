@@ -1,0 +1,440 @@
+---
+title: "Give every agent its own mailbox: building an actor-based multi-agent system"
+description: "What the actor model is, why I built my research agent Retro as five actors talking through queues, and the nine things that broke on the way. With the real code, the decision records and the eval numbers, small samples included."
+date: 2026-11-06
+tags: ["ai", "agents", "architecture", "llm"]
+---
+
+import Figure from "@/components/Figure.astro"
+
+Retro writes a cited research report using five AI agents. One of its tests starts the writer agent as a real process, waits until it logs that it has started a run, and kills it with SIGKILL. No cleanup code runs and no lock gets released. A few seconds later another writer picks the job up, and the run still ends with exactly one report.
+
+That test is the reason I'm writing this. The easy way to build a research agent is one Python process that calls plan, then research, then write, then review. It works on the first demo. Then a worker dies halfway through a draft, or the provider answers 429, or the same message shows up twice, and the whole run either hangs or does the work again on your API key.
+
+Along the way I watched an LLM reviewer give reports with deliberately planted wrong numbers a score of about 0.85. I saw one retry of a web search cost about 400k tokens. A short network blip once dropped 13 of 14 pages. Each of those became a fix, a decision record in the repo (there are 14 of them now) and usually a test that runs real worker processes against a real queue.
+
+[Retro](https://retro.ansh.life) is open source on [GitHub](https://github.com/devhimanshuhc/retro). The agents are Python 3.12 workers on [BullMQ](https://docs.bullmq.io/) queues in Redis, with each run's state in MongoDB, and the web app is Next.js. Everything runs locally in Docker with your own Anthropic or OpenAI key.
+
+This post is for engineers who already have an agent pipeline that works on a good day and are now fighting crashes, duplicate work, rate limits and token bills. If you have a single agent with a few tools, you probably don't need any of this yet. I'll explain what an actor is, show how Retro maps onto the idea, then start from a minimal version and break it nine times.
+
+<Figure src="/blog/actor-based-multi-agent-systems/fig-1.html" title="Five actors, one post room" ratio="16 / 10" caption="Fig 1. Retro's five agents as stations in a pneumatic-tube post room. Capsules carry only a run id and a revision; everything else lives in the run's ledger." />
+
+## Terms I'll use
+
+| Term | What it means here |
+|---|---|
+| Actor | A worker that owns one job, reads messages from its own mailbox, and never calls another actor directly |
+| Mailbox | The actor's queue. In Retro, one BullMQ queue per agent, like `agent.write` |
+| Message | What travels between actors. In Retro it holds only a run id and a revision number |
+| Run record | One MongoDB document per run holding the request, plan, findings, drafts, reviews and step states |
+| Step | One actor's turn on a run: plan, research, write, review |
+| Revision | Which draft a step belongs to. A send-back from the reviewer bumps it by one |
+| Outbox | Saving a step's result and its next message in one write, then sending |
+| Dead letter | A job that failed for good, saved with its error and the model's last output so a person can look and replay it |
+
+## What an actor-based multi-agent system is
+
+The actor model is an old idea from concurrent programming, and Erlang and Akka are the places most people meet it. An actor is a small unit of work with three parts. It has a mailbox. It has private state that nothing else can touch. It has a behaviour that handles one message at a time. Actors share no memory and never call each other's functions. The only way to affect another actor is to send it a message.
+
+That sounds academic until you put LLM calls inside it. An agent step is slow (tens of seconds to minutes), it fails in ordinary ways (429s, 5xx errors, timeouts), and it costs real money. Those are the exact conditions where you want each piece isolated, so one failure stays local and one slow agent doesn't block the rest.
+
+There are roughly three ways to wire several agents together:
+
+- **A function chain.** Agent A returns, agent B gets called with A's output. Simple, and one crash kills the whole thing.
+- **An orchestrator that calls subagents and waits.** Anthropic's [multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system) works this way, and their post names the synchronous calls as a bottleneck.
+- **Actors on queues.** Each agent is its own process reading its own queue. Nobody waits on anybody. A crashed agent's message sits in its queue until another copy takes it.
+
+Retro is the third one. Each agent is a BullMQ worker on its own queue, started as its own container with `python -m app.agents.<name>`. The code comment on the base class says it plainly: one agent "consumes its own queue, runs the handler, sends the next message. Holds no state of its own."
+
+That last part is where I bend the textbook. A classic actor keeps state inside itself. Retro's actors are stateless, and all the state for a run lives in one MongoDB document that every actor reloads at the start of its step. A purist would call that a worker pool around a shared record. The parts of the actor model I actually care about still hold: agents never import or call each other, the only channel between them is a queue message, and exactly one actor owns each step at a time.
+
+If you want other reference points, Microsoft rebuilt [AutoGen v0.4](https://microsoft.github.io/autogen/0.4.0/user-guide/core-user-guide/index.html) on the actor model, [Dapr Agents](https://dapr.io/ai/) runs agents as virtual actors on a durable workflow engine, and [Temporal](https://temporal.io/blog/durable-execution-meets-ai-why-temporal-is-the-perfect-foundation-for-ai) gives you durable execution instead of queues. The closest paper I found is [AgentScope](https://arxiv.org/abs/2402.14034), which uses message exchange as the only communication between agents.
+
+## What Retro does
+
+You type a question. A router decides whether it needs research, a chat reply, or a polite decline. If it needs research, a planner splits it into a few research questions and a list of report sections. A researcher searches the web, fetches the pages and PDFs itself, adds academic papers from OpenAlex, ranks passages with BM25 and writes findings that cite passage ids. A writer turns the findings into a 400 to 900 word Markdown report with numbered citations. A critic runs checks in code, then an LLM rubric, and either passes the report or sends it back, up to 3 drafts.
+
+What you get back is a report where every quote is text from a page Retro actually read and every number appears in the sources, plus review scores, token cost per agent and a live timeline of each step. A run takes about 3 minutes.
+
+| Agent | Mailbox | Its one job | Sends to | Default model |
+|---|---|---|---|---|
+| Router | `agent.router` | Decide chat, decline or research | Planner, or ends the run with a reply | `claude-haiku-4-5-20251001` |
+| Planner | `agent.supervisor` | Request into a validated plan of questions and sections | Researcher | `claude-haiku-4-5-20251001` |
+| Researcher | `agent.research` | Search, fetch, rank, pick passages | Writer | `claude-haiku-4-5-20251001` |
+| Writer | `agent.write` | Findings into a cited report, or fix the critic's errors | Critic | `claude-sonnet-5-5` |
+| Critic | `agent.critic` | Code checks, then a rubric. Pass, or send back | Writer (next revision), or nobody | `claude-haiku-4-5-20251001` |
+
+On OpenAI keys the small model is `gpt-6-luna` and the writer is `gpt-6.1-sol`, and every agent's model can be changed in settings. There's also a sixth queue, `agent.dlq`, which isn't a worker. It holds a copy of every dead-lettered job so the dashboard can show its depth.
+
+One honest note on the count. Retro's first decision record says "the four agents (planner, researcher, writer, reviewer)". The router came later, so today there are five actor queues. The record is older than the code.
+
+## Version 0: the minimal version
+
+Here's the strawman. This is a sketch, not Retro's code, but it's the shape most agent pipelines start in:
+
+```python
+# version 0: a sketch, not code from Retro
+async def run(request: str) -> str:
+    plan = await plan_llm(request)
+    findings = await research(plan)
+    draft = await write(findings)
+    for _ in range(3):
+        review = await critic(draft)
+        if review.passed:
+            return draft
+        draft = await write(findings, review.errors)
+    return draft
+```
+
+I like how it reads. It's easy to debug in one terminal. All the state lives in local variables, so there's no database and no queue to run. For a weekend prototype I'd still start here.
+
+Now let's break it.
+
+## The breaks
+
+### Break 1: one crash takes the whole run with it
+
+In version 0, a crash in `write` loses the plan and the findings you already paid for. You start over. And because each function gets only what the previous one returned, every agent works from whatever the last agent decided to pass along. [Cognition's "Don't Build Multi-Agents"](https://cognition.ai/blog/dont-build-multi-agents) argues agents fail exactly when they get a summary instead of the full context, and the [MAST failure study](https://arxiv.org/abs/2503.13657) lists loss of conversation history as its own failure mode.
+
+My fix was [decision 01](https://github.com/devhimanshuhc/retro/blob/main/docs/decisions/01-agents-talk-only-through-queues.md). Each agent becomes a separate process with its own queue. A message carries only ids:
+
+```python
+class AgentMessage(BaseModel):
+    """What travels in a queue between actors: ids only. Everything else is read from the run doc in Mongo."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    workflow_run_id: str = Field(min_length=1)
+    revision: int = Field(default=0, ge=0)
+```
+
+The `extra="forbid"` matters more than it looks. It stops anyone from "just adding the findings to the message" later. Plans, findings and drafts live in one run document, so an actor gets its full context with one read. In the words of the decision record: "Because every agent loads the whole run record, none of them works from a shortened summary passed along by the previous one."
+
+With the plumbing moved into a base class, a whole agent gets small. This is the entire planner:
+
+```python
+async def handle(run: WorkflowRun, msg: AgentMessage) -> Outcome:
+    await progress.report("planning", "Breaking the request into research questions and report sections")
+    c = await llm.complete("supervisor", run.request, system=SYSTEM, schema=Plan.model_json_schema())
+    plan = Plan.model_validate(c.data)  # a bad plan raises, so the job retries
+    await progress.report("planned", f"Plan ready: {len(plan.objectives)} questions, {len(plan.outline)} sections",
+                          questions=[o.question for o in plan.objectives], outline=plan.outline)
+    return Outcome(next_queue=queues.RESEARCH, run_updates={"plan": plan}, usage=Usage(**c.usage))
+
+
+if __name__ == "__main__":
+    main(queues.SUPERVISOR, handle)
+```
+
+You'll notice there's no orchestrator. Routing is just each handler returning `Outcome(next_queue=...)`. The "supervisor" in the code is the planner, and it doesn't watch anyone.
+
+The cost of this design is that every step reloads the whole run document. That's fine because the document is bounded: at most 3 reports per run, far below MongoDB's 16 MB limit.
+
+### Break 2: the next agent reads an empty record
+
+Once my agents talked through queues, every step does two things: save its output to the database and send a message to the next queue. Both orders go wrong.
+
+If you send first, the next agent can start before your output exists and read an empty record. If you save and send as two unrelated steps, a crash between them loses the message, and the run sits in "working" forever.
+
+[Decision 02](https://github.com/devhimanshuhc/retro/blob/main/docs/decisions/02-save-then-send.md) is the transactional outbox pattern. Save the outputs, mark the step done and record the next hop in one atomic write. Then send. Here's the core of the actor's loop:
+
+```python
+        run = await state.claim_step(self.db, msg.workflow_run_id, self.step, msg.revision)
+        if run is None:
+            await self._resend(msg)
+            self.log.info("skip run=%s rev=%s (duplicate, stale, or run finished)", msg.workflow_run_id, msg.revision)
+            return "skipped"
+        ...
+        # Outbox: save outputs + done + next hop in one write, then send. Sending first could let the next
+        # actor read the run before our outputs exist; a crash after this write is healed by _resend.
+        if await state.finish_step(self.db, run.id, self.step, msg.revision, next_hop=hop, **updates) is None:
+            self.log.info("lost run=%s rev=%s to a concurrent duplicate", run.id, msg.revision)
+            return "skipped"
+        if hop:
+            await self._send(run.id, hop)
+```
+
+The healing part is `_resend`. If a worker crashes after the write but before the send, BullMQ redelivers the job. The new worker sees the step is already done at this revision with a recorded next hop, and only re-sends that hop. It doesn't call the model again. There's a test named `test_crash_after_save_before_send_is_healed_by_redelivery` that checks exactly this.
+
+<Figure src="/blog/actor-based-multi-agent-systems/fig-2.html" title="Save, then send" ratio="16 / 10" caption="Fig 2. A step's result is stamped into the run ledger before its next capsule leaves. A redelivered capsule finds the stamp and only re-sends." />
+
+### Break 3: the same message arrives twice
+
+Queues deliver at least once. BullMQ will hand a job to a second worker if the first one stops renewing its lock, and `_resend` above sends messages again on purpose. MAST counts step repetition as 17.1% of the failures it studied. So every actor has to be safe to run twice on the same input.
+
+I guard this in two places. The first is the queue. The job id is built from the run, the step and the revision, so the same message enqueued twice is one job:
+
+```python
+DEFAULT_JOB_OPTS = {
+    "attempts": 3,
+    "backoff": {"type": "exponential", "delay": 2000},  # retries after 2s, then 4s
+...
+def job_id(run_id: str, step: str, revision: int) -> str:
+    # '-' not ':' because Node BullMQ rejects ':' in custom ids
+    return f"{run_id}-{step}-{revision}"
+
+
+async def enqueue(queue: Queue, message: AgentMessage) -> Job:
+    """Send a message to an actor's mailbox. The same run/step/revision enqueued twice gives one job."""
+    step = step_of(queue)
+    jid = job_id(message.workflow_run_id, step, message.revision)
+    return await queue.add(step, message.model_dump(), {**DEFAULT_JOB_OPTS, "jobId": jid})
+```
+
+Completed jobs are kept for 24 hours and failed jobs for 7 days, so re-adding the same id stays a no-op inside that window. Redis runs with `noeviction`, because an evicted key is a lost job.
+
+The second guard is the database. Before doing any work, the actor claims the step with one atomic `find_one_and_update`:
+
+```python
+    t = now()
+    doc = await runs(db).find_one_and_update(
+        {
+            "_id": run_id,
+            "status": {"$nin": list(TERMINAL)},
+            "revision": {"$lte": revision},
+            "$nor": [{f"steps.{step}.status": "done", f"steps.{step}.revision": {"$gte": revision}}],
+        },
+        {"$set": {
+            f"steps.{step}": StepState(status="working", revision=revision, started_at=t).model_dump(),
+            "status": "working",
+            "updated_at": t,
+        }},
+        return_document=ReturnDocument.AFTER,
+    )
+```
+
+The claim succeeds only if the run isn't finished or canceled, the message isn't for an old revision, and the step isn't already done for this revision. A step marked `working` doesn't block, on purpose, so a retry after a crash can always take it back. The matching `finish_step` only writes if the step is still `working` at this revision, so if two copies race, one of them loses cleanly and logs it.
+
+I want to be careful with wording here, because "exactly once" gets thrown around a lot. Delivery is at least once. A handler, including its LLM call, can run more than once if a worker dies mid-step. What happens once is the saved result of the step and the message that follows it. I call that effectively once. The tokens of a killed attempt are still spent.
+
+### Break 4: a worker dies mid-step, then dies again
+
+A killed worker can't report its own death. BullMQ handles the simple case with locks: a worker holds a lock on its job and renews it, and when the lock expires (30 seconds in production, 1.5 seconds in tests "so recovery takes seconds") the stalled-job check hands the job to someone else. Docker's `restart: unless-stopped` brings the dead container back.
+
+The case that bit me was a job whose worker was killed twice. With `maxStalledCount` at 1, the second stall makes BullMQ fail the job inside the queue without ever calling my processor. My dead-letter code lived in the processor, so it never ran, and the run hung in "working" forever. [Decision 07](https://github.com/devhimanshuhc/retro/blob/main/docs/decisions/07-dead-letters-and-replay.md) puts it bluntly: "A run must never hang in 'working' forever." The fix was to also listen to the queue's own `failed` event:
+
+```python
+    def _on_failed(self, job, err) -> None:
+        # A job whose worker died more than maxStalledCount times is failed by BullMQ without calling _job.
+        if getattr(job, "deferredFailure", None):
+            task = asyncio.ensure_future(self._dead_letter(job, err))
+            self._bg.add(task)
+            task.add_done_callback(self._bg.discard)
+```
+
+For ordinary errors, every job gets 3 attempts with exponential backoff: a 2 second wait, then 4 seconds. Not every error deserves a retry, so the LLM wrapper sorts them first. A 429 becomes `RateLimited` (see the next break). Other 4xx errors, except a 408 timeout, become `UnrecoverableError`, because a bad request or a bad key won't fix itself. 5xx errors, "overloaded" and timeouts get retried. A malformed queue message also goes straight to dead letters, since retrying can't fix it.
+
+[BullMQ has no built-in dead-letter queue](https://docs.bullmq.io/guide/retrying-failing-jobs), so I built one. On the final attempt, the actor saves a dead letter to MongoDB with the queue, job id, run id, revision, error, stack and up to 20,000 characters of the model's last output, puts a copy on `agent.dlq`, and marks the run failed. API keys get stripped out of the error, stack and output by a regex before anything is stored.
+
+A person can then hit Replay on the dead-letters page. Replay has to happen once, even if someone double-clicks, so the guard is an atomic status change on the run:
+
+```python
+    # Reopening is the atomic guard: only one replay can move the run from failed back to working.
+    if not (await state.runs(db).update_one({"_id": dl.workflow_run_id, "status": "failed"},
+                                            {"$set": {"status": "working", "updated_at": now()}})).modified_count:
+        raise NotReplayable("run is not failed")
+    agent_q, dlq = queues.open_queue(dl.queue, redis_url, prefix), queues.open_queue(queues.DLQ, redis_url, prefix)
+    try:
+        if job := await agent_q.getJob(dl.job_id):
+            await job.retry("failed", {"resetAttemptsMade": True})
+        else:  # failed jobs expire after removeOnFail (7 days); the job id is free again
+            await queues.enqueue(agent_q, AgentMessage.model_validate(dl.data))
+        if copy := await dlq.getJob(dl.id):
+            await copy.remove()
+```
+
+I took the retry philosophy from a post called [Your Agent Needs a Supervisor, Not a Retry Loop](https://tianpan.co/blog/2026-07-02-your-agent-needs-a-supervisor-not-a-retry-loop): a retry must start from clean, durable inputs, and logic failures belong in a dead-letter queue, not in an endless loop.
+
+<Figure src="/blog/actor-based-multi-agent-systems/fig-3.html" title="Retries, dead letters and replay" ratio="16 / 10" caption="Fig 3. Three attempts with 2s and 4s waits, then the dead-letter tray. A replay sends the job back once." />
+
+One side story from this part. redis-py 8 sets a 5 second socket timeout by default, but BullMQ blocks for 5 to 10 seconds while waiting for jobs. The read timed out, BullMQ took it for a dropped connection and quietly slept 15 seconds, so new jobs waited up to about 20 seconds before anyone picked them up. The fix is one query parameter, `socket_timeout=30`, and a comment explaining why it's there.
+
+### Break 5: one 429 turns into a pile of them
+
+You'll run more than one copy of a busy agent. When the provider answers 429, the obvious move is to back off in the worker that got it. But its sibling copies don't know, keep calling, and keep getting 429s, and the retries stack up.
+
+[Decision 06](https://github.com/devhimanshuhc/retro/blob/main/docs/decisions/06-rate-limits-pause-the-agent.md) pauses the whole queue instead:
+
+```python
+        except llm.RateLimited as e:
+            # Pause every worker of this agent together, not just this one; the raise makes BullMQ retry the job.
+            ms = e.retry_after_ms or config.RATE_LIMIT_PAUSE_MS
+            await self._queue(self.queue_name).rateLimit(ms)
+            self.log.warning("rate limited run=%s: pausing %s for %sms", run.id, self.queue_name, ms)
+            await self._emit("rate_limited", run.id, pause_ms=ms)
+            raise
+```
+
+The pause length comes from the provider when it says (the Claude SDK's reset time, or OpenAI's `retry-after` header), and defaults to 30 seconds otherwise. Two details I didn't expect. bullmq-python ignores `queue.rateLimit()` unless the worker has a limiter set, so every worker gets one with a limit of 1,000,000 jobs per second, high enough to never bind by itself. And because the Python port re-polls every 5 seconds, pickup after a pause can lag by up to 5 seconds. I left that shortcut in and wrote it down.
+
+The test starts two real workers, fakes a 429 with a 3 second pause, and checks that the idle second worker doesn't grab the job and that nobody starts during the pause. The decision record notes that the test fails if the pause is removed, which is the only kind of test I trust for this.
+
+### Break 6: the review loop spends your key
+
+The writer and critic form a loop: draft, review, send back, redraft. Anthropic's [Building effective agents](https://www.anthropic.com/engineering/building-effective-agents) calls this evaluator-optimizer. A loop that never passes, or a search that keeps retrying, can spend without limit on someone's own API key.
+
+I gave Retro two limits. `MAX_REVISIONS` caps drafts at 3. And [decision 08](https://github.com/devhimanshuhc/retro/blob/main/docs/decisions/08-token-budget.md) adds a budget of 500,000 tokens per run, checked before each step:
+
+```python
+        try:
+            used = run.tokens_used()
+            # the budget stops extra rewrites, never the first report: research already paid for it
+            first_report = (self.step == "write" and not run.revisions) or (
+                self.step == "critic" and len(run.revisions) == 1 and run.revisions[0].critique is None)
+            over = used >= config.RUN_TOKEN_BUDGET and not first_report
+            outcome = self._over_budget(run, used) if over else await self.handler(run, msg)
+```
+
+The exception is the part I'd copy. Once research is done, the money is already spent, so the first report always gets written and reviewed. Over budget, the actor makes no model call and ends the run as completed with the latest draft and a warning, or as failed if there's no draft at all.
+
+The researcher has its own guard. When fewer than half of the pages it found are papers or official sources, it runs one more search for official ones. That retry only happens if the run has used less than half its budget, and it's capped at 5 turns. The comment explains why: "the first full retry cost ~400k tokens."
+
+The gap I know about: the budget is checked between steps, so a step that's already running can go over.
+
+### Break 7: the model writes its own citations
+
+Language models invent URLs and put words in a source's mouth. A reviewer model doesn't reliably catch it either. In my tests, an LLM rubric alone passed reports with deliberately planted wrong numbers, scoring them about 0.85.
+
+I handled this with two decisions. [Decision 03](https://github.com/devhimanshuhc/retro/blob/main/docs/decisions/03-quotes-copied-by-code.md): code fetches the pages, splits them into numbered passages of whole sentences, and the model only returns passage ids. Ids that weren't in the set get dropped. The quote in the report is the passage text, copied by code, and the sources list is built by code too. [Decision 05](https://github.com/devhimanshuhc/retro/blob/main/docs/decisions/05-numbers-checked-in-code.md): before the LLM rubric runs, the critic checks the report with plain string logic. Every outline heading is present, every sentence with a digit carries a citation, every citation is in range, and every number in the body appears in the evidence:
+
+```python
+    # A number the findings never state is invented or miscopied; the LLM rubric lets these through (scores ~0.85).
+    text = "\n".join(line for line in body.splitlines() if not line.lstrip().startswith("#"))
+    if unknown := sorted(numbers(text) - numbers(evidence)):
+        errors.append(f"numbers not stated in the findings (use only the findings' numbers): {', '.join(unknown[:10])}")
+```
+
+Any error is a cheap fail: the LLM review is skipped and the writer gets the exact list. The writer prompt also forbids computing new numbers like sums, shares or growth, because those would fail this check. As the record says, "A string check can't be talked into accepting a number that isn't in the sources." What it can't catch is a missing fact, or a false claim that something wasn't reported.
+
+A related scare, since we're talking about what the model can touch. A research call once invoked one of the user's claude.ai connectors. Agents must never reach the user's accounts. Now every model call runs with no tools unless the step asks for them, no repo settings and no MCP servers, and a tool call it wasn't given aborts the call. Page fetches also refuse non-public IP addresses on every redirect, because the URLs come from a model that reads untrusted pages.
+
+### Break 8: the right fact from the wrong source
+
+Retrieval broke on me in two ways. First, the model labelled aggregator sites as official sources. A report on Nvidia's earnings should rest on Nvidia's own release, not a site repackaging it, and in one run an aggregator's wrong year-ago EPS figure ($1.05) made it into the report. [Decision 09](https://github.com/devhimanshuhc/retro/blob/main/docs/decisions/09-source-strength-by-site.md) decides source strength by host in code: government and investor-relations hosts are official, journals and preprint servers are papers, and a list of aggregators can never be either, whatever the model claims.
+
+Second, keyword ranking missed facts. I chose BM25 over embeddings in [decision 04](https://github.com/devhimanshuhc/retro/blob/main/docs/decisions/04-keyword-ranking.md) because it's free, fast, needs no extra service, and its mistakes are easy to explain. But it missed facts sitting in tables, and facts worded differently from the question: "outlook" when the question said "guidance". [Decision 10](https://github.com/devhimanshuhc/retro/blob/main/docs/decisions/10-read-official-documents-whole.md) sends short official documents and papers to the model whole, shortest first, up to about 30,000 characters (roughly 7.5k tokens). Long documents still get ranked.
+
+I measured decision 10 with an end-to-end eval: one question about Nvidia's Q2 fiscal 2027 earnings, 7 must-have facts checked by hand against Nvidia's SEC filing, and 2 must-not patterns, including that wrong $1.05.
+
+| | Before (3 runs) | After (2 runs) |
+|---|---|---|
+| Facts found | 10 of 21 (0.476) | 12 of 14 (0.857) |
+| 95% interval | 0.283 to 0.676 | 0.601 to 0.960 |
+| Wrong facts | 2, both in one run | 1 |
+| Source quality, mean | 0.30 | 0.67 |
+| Tokens, mean | 144,940 | 103,890 |
+| Seconds, median | 144 | 180 |
+| Drafts, mean | 2.33 | 2.5 |
+
+<aside class="callout"><strong>Read this table with care.</strong> It's five runs of one question. The intervals are wide on purpose and they overlap only a little, so I believe the direction, not the exact size. "After" is cheaper and slower. Per run, the after-runs used 121,382 and 86,399 tokens, and the before-runs ranged from 58,705 to 298,548. Each after-run still missed 1 of 7 facts, and one wrongly said no segment results were published.</aside>
+
+### Break 9: a "hey" costs a full report
+
+The last break was cost. Multi-agent systems burn tokens; Anthropic's post estimates about 15 times the tokens of a chat. Two changes helped me here.
+
+The router came first. Every user message goes to it, and only research reaches the planner, so "hey" costs a few hundred tokens instead of a report. A regex overrides it on plain requests for a report, because the small model once answered a report request by asking to "verify" a recent event.
+
+Then [decision 11](https://github.com/devhimanshuhc/retro/blob/main/docs/decisions/11-smaller-model-for-research-and-review.md) moved planning, research and review to the small model and left only the writer on the large one. Research mostly picks passages and summarises them, and review fills in a fixed scorecard, and neither gained from the bigger model. Turning thinking off for the reviewer helped too. Thinking was about 90% of the reviewer's output tokens, and turning it off cut those by about 30 times. On the retrieval eval, answer accuracy held at 0.857. One honesty note: the eval result files don't record which model ran, so I can't prove from the files alone which run used which model.
+
+## Problem to part map
+
+| Problem | The part that fixes it | Decision |
+|---|---|---|
+| One crash kills the run | Separate processes, one queue each, ids-only messages | 01 |
+| Next agent reads an empty record | Save result and next hop in one write, then send | 02 |
+| Same message delivered twice | Deterministic job id plus atomic claim and finish | 02, schema |
+| Worker killed twice, run hangs | Listen to the queue's `failed` event, dead letters, replay once | 07 |
+| 429s pile up across copies | Pause the whole queue for the provider's wait | 06 |
+| Loop spends without limit | 3-draft cap and a 500k token budget per run | 08 |
+| Invented quotes and numbers | Quotes copied by code, numbers checked by code | 03, 05 |
+| Aggregators posing as official | Source strength decided by host | 09 |
+| Keyword ranking misses wording | Read short official documents whole | 04, 10 |
+| Small talk costs a report | A router, small models outside the writer | 11 |
+
+## What the evals say
+
+The retrieval eval has 14 cases over 18 saved page snapshots, with distractor pages on the same topic. It costs zero tokens to run. The eval history shows hit@6 going from 0.714 on the first run to 0.857, and MRR from 0.595 to 0.702. The result files don't label which change each run tested, so I won't pin each jump on a change. The decision record does say what I tried: removing stopwords and stemming lowered the scores and got rejected, and skipping reference-list passages raised them and shipped. A test now fails the build if hit@6 drops under 0.85 or MRR under 0.70.
+
+Two of the 14 cases still miss, `react-method` and `bm25-params`, where no answering passage reaches the top 6. With an LLM in the loop, the newest run scored answer accuracy 0.857, faithfulness 1.0 and context sufficiency 0.857. Fourteen cases is a small set. It's good for catching regressions and weak for claiming quality.
+
+The reliability side is covered by tests with real worker processes and a real queue, and no model calls. A killed writer still yields exactly one report. A worker killed twice lands in dead letters with the run failed instead of hanging. A 429 pauses every worker of that agent. A step that fails on every attempt is saved with its error and the model's last output, and replay starts it once. A duplicate delivery runs the step once. A cancel mid-step drops the result. A recorded demo of these on the live dashboard is still on my list.
+
+On tokens per report, my own docs disagree with each other, so I'll quote only what I measured: the two end-to-end runs after decision 10 used 86k and 121k tokens, and a question answered only from an uploaded copy of the Bitcoin paper used about 37k.
+
+## What still breaks
+
+- Keyword matching still misses different wording in long documents. That's the 2 of 14 retrieval misses.
+- A report can miss a fact, or wrongly say something wasn't reported. Code checks numbers, not absence.
+- The budget is checked between steps, so a running step can overshoot it.
+- Canceling a run doesn't stop an LLM call already in flight. Its tokens are spent.
+- If Redis is down when you submit, the run stays submitted with no job. There's no sweeper yet.
+- OpenAI support is tested only against a simulated server. Every quality number above is from Anthropic models.
+- It's local-only with no login, and API keys sit unencrypted in the local MongoDB.
+
+## Where I'd start
+
+| Your situation | Start with |
+|---|---|
+| One agent with tools, short runs | Nothing from this post. Keep it in one process |
+| A pipeline of 2 or 3 LLM steps, runs under a minute | One durable record per run and a step status, still in one process |
+| Steps take minutes, or workers crash | One queue per agent, ids-only messages, save then send |
+| More than one copy of an agent | Deterministic job ids, an atomic claim, a whole-queue pause on 429 |
+| Users pay with their own key | A per-run token budget and a hard revision cap, before anything else |
+| Reports with citations | Quotes copied by code and numbers checked by code, before any LLM judge |
+
+## Mistakes I'd avoid
+
+**Putting payloads in messages.** The moment a message carries findings, two copies of the truth exist, and a redelivered message carries stale ones. Send ids and reject extra fields at the schema.
+
+**Sending before saving.** It looks harmless in a demo because the next agent is slower than your database write. It stops being harmless under load.
+
+**Trusting the queue's retries to cover every death.** They cover a single crash. The killed-twice path skipped my processor completely, and those runs hung until I also listened for the queue's own failure event.
+
+**Backing off per worker on a 429.** Rate limits belong to the API key, not the process. Pause the agent, not the worker.
+
+**Letting an LLM judge be the only check.** A rubric scored planted wrong numbers around 0.85. Put the checks that can be code in code, and run them first, since they're free.
+
+**Calling it exactly once.** Your handler can run twice. Design the side effects so the second run is harmless and say "effectively once" when you explain it.
+
+**Testing with mocks only.** The killed-twice hang lives inside the queue library. A mocked queue doesn't have that code path, so it can't fail there. Retro's chaos tests use real processes, a real Redis and a real kill signal.
+
+## Checklist
+
+**Messaging**
+
+- [ ] One queue per agent, and agents never import or call each other
+- [ ] Messages carry ids only, with extra fields rejected
+- [ ] Job id built from run, step and revision
+
+**State**
+
+- [ ] One durable record per run, reloaded in full by every step
+- [ ] An atomic claim before work and an atomic finish after it
+- [ ] Output, done flag and next hop saved in one write, then sent
+- [ ] Redelivered jobs for finished steps re-send the recorded hop
+
+**Failure**
+
+- [ ] Errors sorted: 429 pauses the queue, other 4xx are unrecoverable, 5xx retry
+- [ ] Bounded retries with backoff, then a dead letter with error, stack and last model output
+- [ ] Keys redacted before anything is stored
+- [ ] The queue's own failure event handled for jobs killed more than once
+- [ ] Replay guarded by an atomic status change
+
+**Cost**
+
+- [ ] A token budget per run, checked before each step
+- [ ] A hard cap on revision loops
+- [ ] A cheap router in front of the expensive agents
+
+**Quality**
+
+- [ ] The model picks passages, code copies the quotes
+- [ ] Numbers checked against the sources in code before any LLM judge
+- [ ] A retrieval eval with a floor that fails the build
+
+**Proof**
+
+- [ ] Tests that SIGKILL real workers, deliver duplicates and fake a 429
+
+None of this is new. Queues, outboxes, idempotent consumers and dead-letter queues are decades-old backend patterns. What surprised me is how directly they map onto agents once you stop thinking of an agent as a clever function and start treating it as a slow, flaky, expensive worker with a mailbox. If you build something like this, the [decision records](https://github.com/devhimanshuhc/retro/tree/main/docs/decisions) are short and meant to be read, and I'd like to hear which break hit you first.

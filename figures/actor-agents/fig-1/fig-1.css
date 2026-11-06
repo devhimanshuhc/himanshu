@@ -1,0 +1,53 @@
+
+/* warm paper tokens so the card sits on the site's #edeae3 page */
+.iso[data-theme="light"]{
+  --anatomy-page:transparent;--anatomy-card:#f6f4ef;--anatomy-text:#57554f;--anatomy-strong:#1c1b18;--anatomy-muted:#8d8a82;
+  --anatomy-paper:#f6f4ef;--anatomy-face:#fcfbf8;--anatomy-top:#fdfcfa;
+  --anatomy-shade-0:#dcd8cf;--anatomy-shade-1:#e5e1d9;--anatomy-shade-2:#ece9e2;--anatomy-shade-3:#f3f1ec;
+  --anatomy-lit-top:#ffffff;--anatomy-lit-shade:#efede7;
+  --anatomy-hi:#262521;--anatomy-mid:#7c7970;--anatomy-lo:#aaa69c;--anatomy-faint:#cfcbc1;--anatomy-lit:#121110;
+  --anatomy-halo:#8a8475;--anatomy-halo-opacity:.3;--anatomy-dot:#3b3934;
+  --af-void:#d3cfc5;--af-glass:#e2ded6;--af-glass-on:#c9c4b9;--af-card:#fffefb;
+}
+.iso:not([data-theme="light"]){--af-void:#0a0a0a;--af-glass:#101010;--af-glass-on:#2a2a2a;--af-card:#1e1e1e}
+
+/* the page is the card: it fills its 16:10 frame and scales to width */
+html,body.af-page{height:100%;margin:0;overflow:hidden;background:transparent}
+body.af-page{font:14px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.af-page .iso-figure{margin:0;height:100%}
+.af-page .iso-plate{position:absolute;inset:0;padding:30px 14px 30px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px var(--anatomy-lo)}
+.af-page .iso-plate-corners{inset:12px 14px}
+.af-page .iso-plate-corner[data-corner="hint"]{bottom:0}
+.af-stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;touch-action:pan-y;outline:none}
+.af-stage:focus-visible{outline:1px solid var(--anatomy-faint);outline-offset:-4px}
+.af-stage .iso-svg{width:100%;height:100%;max-width:100%;max-height:100%}
+@media (max-width:520px){
+  .af-page .iso-plate{padding:24px 4px 24px}
+  .af-page .iso-plate-corners{inset:9px 10px}
+  .af-page .iso-plate-corner{font-size:9.5px}
+}
+
+/* parts */
+.af-void{fill:var(--af-void)}
+.af-card{fill:var(--af-card)}
+.af-glass{fill:var(--af-glass);transition:fill .45s var(--anatomy-ease)}
+.af .it[data-busy] .af-glass{fill:var(--af-glass-on)}
+.af .it[data-busy] .af-rows{stroke:var(--anatomy-hi);animation:af-type 1s steps(4,end) infinite}
+@keyframes af-type{0%{stroke-dasharray:0 20}100%{stroke-dasharray:20 0}}
+.af-cap-body{fill:none;stroke:var(--anatomy-lit);stroke-linecap:round}
+.af-cap-band{fill:none;stroke:var(--anatomy-paper);stroke-linecap:round;opacity:.55}
+.af-capsule{pointer-events:none}
+.af .tb-body{fill-opacity:.62}
+
+/* selection: the desk, its inbox tray, the tubes that feed it and its drawer */
+.af .it[data-station],.af .it[data-feeds]{cursor:pointer}
+.af .it .iso-edge,.af .it .tb-edge{transition:stroke .3s var(--anatomy-ease)}
+.af[data-focus] .it[data-on][data-inbox] .iso-edge,.af[data-focus] .it[data-on][data-inbox] .iso-crease{stroke:var(--anatomy-lit);stroke-width:1.3px}
+.af[data-focus] .it[data-on][data-inbox] .iso-line{stroke:var(--anatomy-hi)}
+.af[data-focus] .it[data-on][data-inbox] .iso-top{fill:var(--anatomy-lit-top)}
+.af[data-focus] .it[data-on][data-feeds] .tb-edge{stroke:var(--anatomy-hi);stroke-width:1.1px}
+.af[data-focus] .it[data-on][data-feeds] .tb-body{fill:var(--anatomy-shade-0)}
+.af[data-focus] .it[data-on][data-station]:not([data-inbox]) .iso-edge{stroke:var(--anatomy-hi)}
+.af[data-focus] [data-drawer][data-on] .iso-edge{stroke:var(--anatomy-hi)}
+.af-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.af .it[data-busy] .af-rows{animation:none}.af-glass,.af .it .iso-edge{transition:none}}

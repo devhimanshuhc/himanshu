@@ -1,0 +1,85 @@
+---
+title: "Evra"
+tagline: "An AI health platform where RAG cut clinical data entry 40%"
+summary: "Evra is an AI health companion with 3k+ users. I built its React Native app and FastAPI backend, where LLM summarization and RAG over clinical records cut clinical data entry by 40%."
+kicker: "Client work at Heizen, AI healthcare"
+role: "Software engineer (Heizen)"
+timeline: "Dec 2025 – 2026"
+stack: ["Python", "FastAPI", "LangChain", "MongoDB", "MongoDB vector search", "Fernet encryption", "React Native", "Expo", "TypeScript"]
+links:
+  live: "https://evrahealth.com/"
+order: 2
+tldr:
+  problem: "Clinicians were spending too much time typing data into records by hand. The records also hold clinical data, so every new AI feature had to respect who may see what."
+  built: "A React Native (Expo) app on a FastAPI backend. LLM summarization and RAG use MongoDB vector search and LangChain, clinical fields are encrypted with Fernet, and clinicians sign in with role-based access."
+  outcome: "Clinical data entry dropped by 40%, and the product serves 3k+ users."
+stats:
+  - { value: "40%", label: "less clinical data entry with LLM summarization and RAG" }
+  - { value: "3k+", label: "users on the product" }
+architecture:
+  - { name: "Mobile app", desc: "React Native app built with Expo, shipped to the App Store and Google Play." }
+  - { name: "FastAPI service", desc: "The Python API behind the app. It handles auth, reads and writes records, and runs the AI features." }
+  - { name: "Clinician auth", desc: "Role-based sign-in for clinicians. What a user can see and change depends on their role." }
+  - { name: "Encrypted fields", desc: "Clinical fields are encrypted with Fernet in the application before they are stored, so the database holds ciphertext." }
+  - { name: "MongoDB store", desc: "Holds the application data and the vector index used for retrieval, so records and embeddings live in one database." }
+  - { name: "RAG pipeline", desc: "LangChain retrieves the relevant parts of a record with MongoDB vector search and passes them to the model as context." }
+  - { name: "Summarizer", desc: "LLM summarization over the retrieved context, which is what removed much of the manual data entry." }
+decisions:
+  - title: "Retrieve first, then summarize"
+    problem: "A patient's history can be long, and sending all of it to a model is slow, costly and puts the right details in a pile of wrong ones."
+    decision: "I put a RAG step in front of the summaries. LangChain pulls the relevant parts with vector search, and the model works from those."
+  - title: "Vector search inside MongoDB"
+    problem: "The records already lived in MongoDB. A separate vector database would mean another copy of clinical data to sync and secure."
+    decision: "I used MongoDB vector search, so the embeddings sit next to the data they describe and there is one store to protect."
+  - title: "Encrypt clinical fields in the app"
+    problem: "Disk encryption alone means anyone with database access can read clinical data in plain text."
+    decision: "Clinical fields are encrypted with Fernet before they are written. Together with role-based clinician auth, reading them takes both the key and an allowed role."
+related: []
+---
+
+## Context
+
+Evra is a health product built by a client of Heizen, where I work as a software engineer. On its public site Evra calls itself "an AI-native health platform" and an AI health companion that turns labs, wearables and health history into simple daily actions. It is on the App Store and Google Play, and it is used by both people managing their health and the clinicians who look after them.
+
+I started on Evra in December 2025. My part was the React Native (Expo) app and the FastAPI backend behind it, plus the AI features that run on that backend: LLM summarization and retrieval-augmented generation (RAG) over clinical records. The product now has 3k+ users.
+
+This is client work, so I'm keeping this page at the level of the product and the design. I won't cover internal details, data or anything about specific patients.
+
+## What's in it
+
+### The app
+
+The mobile app is React Native built with Expo, written in TypeScript. It talks to the FastAPI backend, which does the AI work, so the app itself stays a client.
+
+### The API
+
+The backend is a FastAPI service in Python. It owns sign-in, reading and writing records, and the AI features.
+
+### Summaries and RAG
+
+The main problem was clinical data entry. Clinicians were typing in information that was already in a record somewhere. That's slow. I built LLM summarization so that much of that text could be produced from what was already there.
+
+A summary is only useful if it's built from the right parts of a record. So before the model writes anything, a RAG step retrieves the relevant pieces with MongoDB vector search, wired together with LangChain. The model then works from that context and not from the whole history at once.
+
+That's where the 40% drop in clinical data entry came from.
+
+### Where vectors live
+
+The records were already in MongoDB. So I kept the embeddings there too and used MongoDB vector search. That avoided a second database holding a copy of clinical data, with its own sync jobs and its own access rules to get right.
+
+### Protecting clinical data
+
+I relied on two things to guard the data. First, clinical fields are encrypted with Fernet inside the application before they are stored. Someone with raw database access sees ciphertext. Not clinical text. Second, clinicians sign in with role-based auth, and the API checks the role before it returns or changes anything.
+
+## Constraints
+
+- I had to keep clinical data protected at every step, including in the new AI features.
+- The AI work had to fit into the product and data store we already had. It wasn't a fresh system.
+- One backend served the mobile app and the AI features, so changes had to keep the app working.
+- It's client work, so I keep the details at the level of a resume or the public site.
+
+## Results
+
+- Clinical data entry dropped by 40% with LLM summarization and RAG.
+- Evra serves 3k+ users.
+- I shipped both the React Native (Expo) app and the FastAPI backend, with Fernet-encrypted clinical fields and role-based clinician auth.

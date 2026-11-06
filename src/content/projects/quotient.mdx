@@ -1,0 +1,97 @@
+---
+title: "Quotient"
+tagline: "A writing workspace with notes, notebooks and shared drafts"
+summary: "A place to write short notes and longer pieces, file them into collections and come back to an older version. Built on Next.js with Prisma and Postgres, with Google sign-in, share links and an AI drafting button."
+kicker: "Side project"
+role: "Solo builder"
+timeline: "Dec 2024 – Jul 2025"
+stack: ["Next.js 14", "TypeScript", "Prisma", "Neon Postgres", "NextAuth", "TipTap", "Groq", "Tailwind CSS", "Radix UI", "Recharts", "Vercel"]
+links:
+  live: "https://quotient-dun.vercel.app/"
+  source: "https://github.com/devhimanshuhc/quotient"
+order: 5
+tldr:
+  problem: "I wanted one place to collect quotes, reflections and drafts, group them, and not lose a good paragraph when I rewrote it."
+  built: "A Next.js app with a rich text editor, collections, version history on every save, full text search, Word and PDF export, share links for co-editing and a button that drafts a note from a prompt."
+  outcome: "It is live on Vercel and the code is public. The first pass in December 2024 shipped notes, collections, history, analytics and a blog. A second pass in July 2025 added AI drafting and shared editing."
+stats:
+  - { value: "3", label: "versions kept per piece, pruned in the same transaction as the save" }
+  - { value: "3", label: "people per share link by default, owner plus two editors" }
+  - { value: "2 s", label: "debounce before the shared editor autosaves" }
+  - { value: "9", label: "Prisma models, from accounts to share tokens" }
+architecture:
+  - { name: "Next.js app", desc: "App Router pages for notes, collections, shared pieces, analytics and a public blog. Logged-in routes are guarded by the NextAuth middleware." }
+  - { name: "Auth", desc: "NextAuth with Google sign-in and the Prisma adapter. Sessions are JWTs that carry the user id, so API routes don't hit a session table." }
+  - { name: "Writings API", desc: "Route handlers to create, update, search and file pieces into collections. Every update checks that the caller owns the piece." }
+  - { name: "Version history", desc: "Each save writes a new version row and deletes anything past the latest three, inside one Prisma transaction." }
+  - { name: "Editor", desc: "TipTap with headings, quotes, lists, underline and strike. The shared editor saves on a 2 second debounce and is read only for viewers." }
+  - { name: "Sharing", desc: "Share tokens with an active flag, optional expiry and a user cap. Joining adds you as an editor until the cap is reached." }
+  - { name: "AI drafting", desc: "One route calls Llama 4 Scout on Groq with strict HTML rules, then cleans the output before it reaches the editor." }
+  - { name: "Postgres", desc: "Neon Postgres through Prisma. Users, writings, versions, collections, collaborators and share tokens, with cascading deletes." }
+decisions:
+  - title: "Keep only the last three versions"
+    problem: "Saving a full copy on every edit is the simplest history there is, but the table grows with every keystroke burst and most old copies are never opened."
+    decision: "Each save writes the new version and prunes everything past the newest three in the same transaction. It covers the case I care about, getting back the paragraph I just deleted, and the storage stays flat."
+  - title: "Share links instead of invites by email"
+    problem: "Adding a collaborator by email only works if they already have an account, and I didn't want to build email delivery for a side project."
+    decision: "The owner creates a token with an optional expiry and a user cap, default three. Whoever opens the link signs in with Google and joins as an editor. Tokens can be switched off without deleting the piece."
+  - title: "Autosave over a real time sync layer"
+    problem: "I started on live co-editing with Yjs and a websocket server, but it added a second server and a sync layer to a small app."
+    decision: "I removed the realtime routes and kept a simpler model. The editor saves through a PATCH route after 2 seconds of quiet, and the collaborator list refreshes every 30 seconds. Two people editing the same line at once is the case it doesn't handle."
+  - title: "Clean the model's HTML before it reaches the editor"
+    problem: "The drafting model returned HTML with empty paragraphs, empty list items and stacked line breaks, which showed up as big gaps in TipTap."
+    decision: "The prompt spells out the allowed tags and bans empty blocks, and the route runs a cleanup pass that strips empty tags and extra whitespace anyway. I don't trust the prompt alone."
+related: []
+---
+
+## Context
+
+Quotient is a solo side project. I built it to collect quotes, notes and drafts in one place, group them into collections, and keep earlier versions around while I rewrite. The code is public on GitHub and the app runs on Vercel with a Neon Postgres database.
+
+The first pass landed in early December 2024 with the schema, Google sign-in, the notes and collections pages, an analytics page and a small MDX blog. I came back to it in late July 2025 to add search in the navbar, an AI drafting modal and shared editing through links.
+
+It's one Next.js 14 app on the App Router. I kept pages and API route handlers side by side, Prisma talks to Postgres, and NextAuth handles sign-in. There's no separate backend, and I didn't want one.
+
+## What's in it
+
+### Writing and notebooks
+
+A piece of writing has a title, HTML content, a word count and time spent. Pieces can belong to collections, which work as notebooks. The notes page shows them as cards, and opening one gives a TipTap editor with headings, block quotes, lists, underline and strike. An unsaved changes prompt stops you from closing the editor and losing work.
+
+I do export in the browser. A piece can be downloaded as a Word file built with `docx` or a PDF built with `jsPDF`, after the HTML is run through DOMPurify.
+
+### Version history
+
+Every update goes through one Prisma transaction. It updates the writing, reads the latest version number, writes version n+1, then deletes any version past the newest three. The history panel reads those three back in order. That's enough to restore a draft I just wrecked, without building a separate undo system.
+
+### Search
+
+The search route matches the query against titles and content with a case insensitive `contains`, scoped to the signed in user, and returns matching pieces and collections together. It needs at least two characters. That's fine at the size of one person's notes. If it grew, I'd need a real index.
+
+### Sharing and co-editing
+
+Sharing is built on two tables. `ShareToken` holds the token, an active flag, an optional expiry and a cap that defaults to three users. `Collaborator` links a user to a piece with a role of owner, editor or viewer. Opening a share link checks the token, the expiry and the cap, then adds you as an editor.
+
+The shared editor saves through a PATCH route that lets owners and editors write, and viewers get a read only editor. I tried live sync with Yjs and a websocket server first. Then I removed those routes and kept plain saves, which meant one less server to run. Saves are debounced by 2 seconds and the collaborator list refreshes every 30 seconds.
+
+### AI drafting
+
+The AI modal sends a prompt and optional context to one route, which calls Llama 4 Scout on Groq with a system prompt that lists the allowed HTML tags. The route then strips empty paragraphs, empty list items and stacked line breaks before returning the result, so the draft drops into the editor cleanly. The route requires a signed in user.
+
+### Activity tracking
+
+Each save updates the user's last active time. If the gap since the last activity is between 1 minute and 3 hours, it is added to total time spent. Shorter gaps are noise. Longer ones are almost always a tab I forgot to close. The analytics page charts this with Recharts.
+
+## Constraints
+
+- One developer doing product, design and code.
+- Hosted on Vercel, and I wanted to keep it to one deployable app.
+- Google is the only sign-in method, which keeps the auth surface small.
+- Version history had to stay bounded, since every save writes a full copy.
+
+## Results
+
+- Live at quotient-dun.vercel.app with public source on GitHub.
+- The first pass went into the public repo over 4 and 5 December 2024, including production fixes for the Google redirect and the Prisma build step.
+- 19 commits in total across the two build passes.
+- History is capped at three versions per piece, so storage per piece stays bounded no matter how often it is saved.

@@ -1,0 +1,117 @@
+---
+title: "Retro"
+tagline: "A local research agent that cites every claim"
+summary: "Ask a question and five agents plan it, read real sources, write a cited report and check it before you see it. It runs on your own machine with your own API key, and keeps going when a worker crashes."
+kicker: "Open source"
+role: "Solo builder"
+timeline: "2026"
+stack: ["Python 3.12", "FastAPI", "BullMQ", "Redis", "MongoDB", "Claude Agent SDK", "Next.js", "React 19", "Tailwind CSS", "Docker"]
+links:
+  live: "https://retro.ansh.life"
+  source: "https://github.com/devhimanshuhc/retro"
+order: 1
+tldr:
+  problem: "Research agents invent URLs, put words in a source's mouth and pass reports with wrong numbers. They also hang or redo paid work when a worker dies or the provider answers 429."
+  built: "A research app where a router, planner, researcher, writer and critic each run as their own process on their own queue. Code copies every quote and checks every number, and you run it locally in Docker with your own Anthropic or OpenAI key."
+  outcome: "On a hand-checked earnings report, facts found went from 48% to 86% while mean tokens dropped from about 145k to 104k. Killed workers, duplicate deliveries and rate limits are covered by tests with real processes and a real queue."
+stats:
+  - { value: "86%", label: "hand-checked facts found in an earnings report, up from 48%" }
+  - { value: "12 of 14", label: "retrieval test questions with an answering passage in the top 6" }
+  - { value: "1.0", label: "faithfulness score on the 14-case eval, claim by claim" }
+  - { value: "5", label: "agents, each its own process on its own queue" }
+architecture:
+  - { name: "Web app", desc: "Next.js app where you ask a question, attach files and watch each agent's steps stream in live. It also shows review scores, token cost per agent and a dead-letters page with Replay." }
+  - { name: "API", desc: "FastAPI service that creates the run record, enqueues the first message and forwards events over a WebSocket. It is not an agent and makes no decisions." }
+  - { name: "Router", desc: "Reads every message and decides between research, a chat reply or a polite decline. Only research reaches the planner, so small talk costs a few hundred tokens." }
+  - { name: "Planner", desc: "Turns the request into a validated plan of research questions and report sections. A bad plan raises, so the job retries." }
+  - { name: "Researcher", desc: "Searches the web, fetches pages and PDFs itself, adds OpenAlex papers and ranks passages with BM25. The model only picks passage ids." }
+  - { name: "Writer", desc: "Turns findings into a 400 to 900 word Markdown report with numbered citations. It is the only agent on the large model." }
+  - { name: "Critic", desc: "Checks headings, citations and numbers in code, then scores the draft with an LLM rubric. It passes the report or sends it back, up to 3 drafts." }
+  - { name: "Run record", desc: "One MongoDB document per run holds the plan, findings, drafts, reviews and step states. Queue messages carry only a run id and a revision." }
+  - { name: "Dead letters", desc: "A job that fails for good is saved with its error, stack and the model's last output, and the run is marked failed. A person can replay it once." }
+decisions:
+  - title: "Agents talk only through queues"
+    problem: "In a chain of agents, one crash takes down the rest, and each agent works from a summary the previous one chose to pass along."
+    decision: "Each agent is a separate process with its own queue, and messages carry only a run id and a revision. Plans, findings and drafts live in one record that every agent loads in full."
+  - title: "Quotes are copied by code, never written by the model"
+    problem: "Models invent URLs and put words in a source's mouth, and a reviewer model doesn't reliably catch it."
+    decision: "Code fetches the pages, splits them into numbered passages, and the model only picks numbers. The quotes and the sources list are built by code, so every citation points at text that exists."
+  - title: "Short official documents are read whole"
+    problem: "Keyword ranking missed facts in tables and facts worded differently from the question, like outlook when the question said guidance."
+    decision: "Official documents and papers that fit in about 30,000 characters go to the model in full. Long documents are still ranked."
+  - title: "Users bring their own API key"
+    problem: "Anthropic's terms don't allow third-party products to offer sign-in with a claude.ai account."
+    decision: "Retro runs on the user's own Anthropic or OpenAI key, checked with the provider before it's saved and never shown again. A key also makes cost visible, since each run shows its token use."
+  - title: "Research your own files"
+    problem: "Private documents are the main reason to run research on your own machine."
+    decision: "You can attach PDFs, text, Markdown, HTML, CSV or JSON, with or without web search. Files are ranked and quoted like web pages, and only the passages used reach the model provider."
+related: ["actor-based-multi-agent-systems"]
+---
+
+## Context
+
+Retro is a research agent I built alone and open sourced. You ask a question in a web app and get back a Markdown report of 400 to 900 words where every quote is text from a page Retro actually read and every number appears in the sources. Next to it you see the review scores, the token cost of each agent and a timeline of every step. A run takes about 3 minutes.
+
+It runs on your own computer. One install command starts everything in Docker and opens the app, which asks once for an Anthropic or OpenAI key.
+
+Under the hood it's two apps that share no code. `apps/agents` is Python 3.12 with FastAPI, a Python port of BullMQ for queues on Redis, and MongoDB for state. `apps/web` is Next.js 16 with React 19 and Tailwind 4. They talk only over HTTP and a WebSocket.
+
+This page is the product view: what Retro does for you, its parts and the calls I made. The engineering story, with the code, the failure modes and how each one was fixed, is in the post [Give every agent its own mailbox](/blog/actor-based-multi-agent-systems/).
+
+## What's in it
+
+### Five agents, one job each
+
+Every message goes to a router first. It decides whether you want research, a chat reply or a polite decline. If you asked for a report in plain words, a regex makes sure it researches, because the small model once answered a report request by asking to "verify" a recent event.
+
+Research runs through four more agents. The planner splits the request into research questions and report sections. The researcher searches, reads and picks passages. The writer drafts the report. The critic reviews it and either passes it or sends it back with exact errors, up to 3 drafts.
+
+I made each agent its own container reading its own queue. None of them imports or calls another. That's what lets one agent crash, retry or pause without dragging the others down with it.
+
+### Sources you can check
+
+The researcher fetches pages and PDFs itself and splits them into passages of whole sentences. It adds up to 3 academic papers per question from OpenAlex. The model sees numbered passages and returns only their ids, and code copies the passage text into the report as the quote.
+
+I don't let the model decide how strong a source is. The site decides. Government and investor-relations hosts count as official, journals and preprint servers as papers, and a list of aggregators can never be either. If fewer than half of the readable pages are strong sources, the researcher runs one more search for official ones, as long as the run has used less than half its token budget.
+
+Before any LLM judges the draft, the critic runs plain string checks. I trust these more than any rubric. Every outline heading is there, every sentence with a digit has a citation, every citation is in range, and every number in the report appears in the evidence. A draft that fails skips the LLM review and goes straight back to the writer.
+
+### Your files and your key
+
+You can attach your own PDFs, notes or data exports, which is the main reason I'd run research locally at all. You can research them alone or alongside the web. Text is pulled out once and the file isn't kept. Turn web search off and nothing about your question goes to websites or the paper index. Only the passages picked for the report reach the model provider.
+
+Your key is checked with the provider before it's saved, never returned by the API and stripped from any stored error. Each agent's model can be changed in settings. By default only the writer runs on the large model, and the router, planner, researcher and critic use the small one.
+
+### When something breaks
+
+A crashed step is picked up again by another worker once its lock expires, and the run still ends with one report. A rate limit pauses every copy of that agent together, not just the worker that got the 429. A job that fails 3 times lands on a dead-letters page with its error, stack trace and the model's last output, and you can replay it once.
+
+Since it's your key paying, each run also has a token budget, 500k by default, checked before every step. Going over it stops extra rewrites, but it won't stop the first report, since research already paid for it.
+
+### Watching a run
+
+I wanted to see what the agents were doing, so the run page streams each step as it happens: the questions it planned, what it's searching, which pages it read, each send-back and the final scores. A paused agent shows as paused. A dead-lettered step links straight to its replay. When the run finishes you see the tokens each agent used.
+
+### Edit and export
+
+You can ask for changes to a finished report. The writer rewrites from the same findings without new research, and the critic checks the new version. Any report can be opened as a Google Doc. Retro signs in to Google itself with OAuth and PKCE and asks only for `drive.file`, so it can see the files it creates and nothing else in your Drive.
+
+## Constraints
+
+- Runs on the user's machine: no analytics, and the user's own model key pays for every run.
+- No sign-in with a Claude or ChatGPT subscription, because Anthropic's terms don't allow it for third-party products.
+- No vector database. I wanted retrieval that's free, fast and easy to explain, so ranking is BM25 in code.
+- Every model call is locked down: no tools unless the step asks for them, no MCP servers. A research call once reached one of my own claude.ai connectors, and agents must never touch the user's accounts.
+- Page fetches refuse non-public IP addresses on every redirect, because the URLs come from a model reading untrusted pages.
+- Install on a normal laptop with Docker Desktop. The first download is about 5 GB, mostly the headless browser used for pages that block plain requests.
+
+## Results
+
+- On an end-to-end eval of one earnings question with 7 hand-checked facts, facts found went from 10 of 21 (48%) across 3 runs to 12 of 14 (86%) across 2 runs after reading short official documents whole. Mean tokens fell from 144,940 to 103,890, and median time went up from 144 to 180 seconds.
+- Those two later runs used 86k and 121k tokens. A question answered only from an uploaded copy of the Bitcoin paper passed review at about 37k tokens.
+- The retrieval eval has 14 questions over 18 saved pages. 12 of 14 have an answering passage in the top 6 (hit@6 0.857, MRR 0.702), and a test fails the build if hit@6 drops under 0.85 or MRR under 0.70.
+- With an LLM in the loop, the newest eval run scored answer accuracy 0.857, faithfulness 1.0 and context sufficiency 0.857.
+- When I planted wrong numbers in reports, an LLM reviewer alone still scored them about 0.85. The code checks catch those before the rubric runs.
+- Turning thinking off for the critic cut its output tokens by about 30 times.
+- Tests with real worker processes and a real queue cover a killed writer, a worker killed twice, a 429, a job that fails every attempt, a duplicate delivery and a cancel mid-step.
+- What I haven't fixed yet: each end-to-end run missed 1 of 7 facts, one wrongly said segment results weren't published, and OpenAI support is tested only against a simulated server.

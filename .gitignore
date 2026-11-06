@@ -23,3 +23,8 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# anatomy figures: commit only the build sources; the site serves public/blog/*/fig-*.html
+figures/_scripts/
+figures/**/shots/
+figures/**/*.html

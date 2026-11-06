@@ -1,0 +1,78 @@
+---
+title: "EquityNav"
+tagline: "AI insight agents and dashboards for equity holders"
+summary: "AI insight agents for vesting, exercises and liquidity, built on the Vercel AI SDK with tool calling, SQL execution, structured outputs and guardrails. Plus projection, scenario and risk dashboards built on synced Carta portfolios."
+kicker: "Client work at Heizen, equity management"
+role: "Software development engineer intern (Heizen)"
+timeline: "Aug 2025 – Jan 2026"
+stack: ["TypeScript", "Vercel AI SDK", "OpenAI", "Gemini", "SQL", "NestJS", "NestJS Scheduler", "Carta", "Docker", "GitHub Actions"]
+order: 4
+tldr:
+  problem: "Questions about vesting, exercises and liquidity depend on exact numbers in a person's equity data. A model that answers from memory will make those numbers up."
+  built: "AI insight agents on the Vercel AI SDK (OpenAI and Gemini) that call tools, run SQL over the data and return structured outputs behind guardrails. Plus dashboards that bring Carta portfolios and an equity-tax engine together, kept current by scheduled sync and alerts."
+  outcome: "Insight agents for three areas (vesting, exercises, liquidity) and three dashboard views (projection, scenario, risk), with sync and alerts automated through NestJS Scheduler, Docker and GitHub Actions."
+stats: []
+architecture:
+  - { name: "Insight agents", desc: "Agents built on the Vercel AI SDK that answer questions about vesting, exercises and liquidity." }
+  - { name: "Model providers", desc: "OpenAI and Gemini, both used through the Vercel AI SDK so the agent code doesn't depend on one vendor." }
+  - { name: "Tools and SQL", desc: "Tools the agents can call, including SQL execution, so answers come from the actual data and not from the model's memory." }
+  - { name: "Output schemas", desc: "Structured outputs give each answer a fixed shape the app can check and render." }
+  - { name: "Guardrails", desc: "Checks around what the agents may do and what they may return." }
+  - { name: "Carta sync", desc: "Brings portfolio data in from Carta on a schedule, run by NestJS Scheduler." }
+  - { name: "Equity-tax engine", desc: "Tax calculations on equity, combined with the Carta portfolios to feed the dashboards." }
+  - { name: "Dashboards", desc: "Projection, scenario and risk views over the unified portfolio and tax data." }
+  - { name: "Alerts and CI", desc: "Scheduled alerts, with services shipped in Docker and built through GitHub Actions." }
+decisions:
+  - title: "Agents query the data instead of recalling it"
+    problem: "Vesting dates, exercise costs and liquidity numbers have to be exact. A model answering from its training data, or from a loose summary, will get them wrong."
+    decision: "I gave the agents tools, including SQL execution, so they look up the numbers for each question and reason over the results."
+  - title: "Structured outputs and guardrails around the agents"
+    problem: "An agent that can run SQL and talk about someone's equity needs limits, and free text is hard for an app to check or display."
+    decision: "Agent answers come back as structured outputs, and guardrails sit around the tool calls and the responses."
+  - title: "Sync Carta on a schedule"
+    problem: "The dashboards and agents need portfolio data that is current. Pulling it by hand is slow and easy to forget."
+    decision: "I automated the Carta sync and the alerts with NestJS Scheduler, and shipped them with Docker and GitHub Actions."
+related: []
+---
+
+## Context
+
+EquityNav is an equity management product built by a client of Heizen. I worked on it as a software development engineer intern at Heizen from August 2025 to January 2026, remote.
+
+The product helps people understand their equity: when shares vest, what exercising costs, and what liquidity could look like. I worked on two parts of it. The first was a set of AI insight agents that answer questions in those three areas. The second was the data side: bringing Carta portfolios and an equity-tax engine together into dashboards, and keeping that data current.
+
+No public link for this one. It's client work, so I'm describing it at the level of my resume and leaving internal details, data and anything about the client's users out of it.
+
+## What's in it
+
+### Insight agents
+
+I built the agents on the Vercel AI SDK, with OpenAI and Gemini as the model providers. The SDK gives both providers the same interface, so I didn't write the agent code twice.
+
+The agents cover three topics: vesting, exercises and liquidity. Each of these comes down to specific numbers in a person's data, like a vesting date or the cost of an exercise, and a model guessing at those is worse than no answer at all. So the agents don't answer from memory. They call tools. One of those tools runs SQL, which means the numbers in an answer come from a query against the data.
+
+### Structured outputs and guardrails
+
+Free text is hard to check. I had the agents return structured outputs, so each answer has a known shape that the app can validate and show. An agent that can run SQL also needs limits, so guardrails sit around what it may call and what it may return. The specific rules stay private.
+
+### Dashboards
+
+On the data side, I unified Carta portfolios with an equity-tax engine and built three views on top: projection, scenario and risk.
+
+### Sync and alerts
+
+Stale data makes a dashboard wrong. Quietly. I automated the Carta sync and the alerts with NestJS Scheduler, so they run on a schedule without anyone triggering them. The services ship in Docker, and builds run through GitHub Actions.
+
+## Constraints
+
+- Answers about equity had to rest on real numbers, not on what a model guesses.
+- The agents needed to work with two model providers.
+- Portfolio data came from Carta and had to stay in sync without manual steps.
+- It's client work with no public link, so I keep the details at resume level.
+
+## Results
+
+- I shipped AI insight agents for vesting, exercises and liquidity, with tool calling, SQL execution, structured outputs and guardrails.
+- I unified Carta portfolios and an equity-tax engine into projection, scenario and risk dashboards.
+- Sync and alerts run on their own through NestJS Scheduler, Docker and GitHub Actions.
+- I don't have usage numbers I can share for this project, so there are none here.

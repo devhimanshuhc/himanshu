@@ -9,7 +9,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "resume:pdf": "node scripts/resumePdf.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
@@ -45,6 +46,7 @@
   },
   "devDependencies": {
     "@types/three": "^0.187.0",
+    "playwright-core": "^1.65.0",
     "tw-animate-css": "^1.2.9"
   },
   "pnpm": {

@@ -235,3 +235,138 @@ html.js:not(.reduced-motion) [data-hero-fade] {
 .bg-texture {
     background-color: var(--background);
 }
+
+/* ---------------------------------------------------------------------------
+ * blog article typography (src/pages/blog/[slug].astro wraps content in .post)
+ * ------------------------------------------------------------------------- */
+.post {
+    font-size: 17px;
+    line-height: 1.72;
+    color: var(--foreground);
+}
+.post > * + * {
+    margin-top: 1.25em;
+}
+.post h2,
+.post h3 {
+    scroll-margin-top: calc(var(--nav-h) + 1.5rem);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+    text-wrap: balance;
+}
+.post h2 {
+    margin-top: 3.2em;
+    padding-top: 1.1em;
+    border-top: 1px solid var(--border);
+    font-size: clamp(1.75rem, 3.2vw, 2.4rem);
+}
+.post h3 {
+    margin-top: 2.2em;
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+}
+.post h2 + *,
+.post h3 + * {
+    margin-top: 0.8em;
+}
+.post p,
+.post li {
+    text-wrap: pretty;
+}
+.post a {
+    text-decoration: underline;
+    text-decoration-color: var(--input);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.2s;
+}
+.post a:hover {
+    text-decoration-color: var(--foreground);
+}
+.post strong {
+    font-weight: 600;
+}
+.post ul,
+.post ol {
+    padding-left: 1.3em;
+}
+.post ul {
+    list-style: disc;
+}
+.post ol {
+    list-style: decimal;
+}
+.post li + li {
+    margin-top: 0.45em;
+}
+.post li::marker {
+    color: var(--muted-foreground);
+}
+.post :not(pre) > code {
+    overflow-wrap: anywhere;
+    font-family: var(--font-geist-mono);
+    font-size: 0.86em;
+    padding: 0.12em 0.36em;
+    border: 1px solid var(--border);
+    background: var(--card);
+}
+.post pre {
+    font-family: var(--font-geist-mono);
+    font-size: 13px;
+    line-height: 1.65;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--border);
+    background: #f6f4ef !important;
+    overflow-x: auto;
+}
+.post table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+    line-height: 1.5;
+    display: block;
+    overflow-x: auto;
+}
+.post th,
+.post td {
+    text-align: left;
+    vertical-align: top;
+    padding: 0.7em 1.2em 0.7em 0;
+    border-bottom: 1px solid var(--border);
+}
+.post th {
+    font-family: var(--font-geist-mono);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    border-bottom-color: var(--foreground);
+}
+.post blockquote {
+    border-left: 2px solid var(--brand);
+    padding-left: 1.1em;
+    color: var(--body);
+}
+/* aside callout: <aside class="callout"><strong>title</strong> text</aside> */
+.post .callout {
+    border: 1px solid var(--border);
+    background: var(--card);
+    padding: 1.1rem 1.25rem;
+    font-size: 15px;
+    line-height: 1.65;
+}
+.post .callout strong:first-child {
+    display: block;
+    margin-bottom: 0.3em;
+}
+.post input[type="checkbox"] {
+    accent-color: var(--foreground);
+    margin-right: 0.5em;
+}
+.post li:has(> input[type="checkbox"]) {
+    list-style: none;
+    margin-left: -1.3em;
+}
+.post hr {
+    border-color: var(--border);
+}

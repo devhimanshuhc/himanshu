@@ -1,0 +1,128 @@
+---
+import { render } from "astro:content"
+import Site from "@/layouts/Site.astro"
+import { formatDate, getPosts, readingTime, related, type Post } from "@/lib/blog"
+
+export async function getStaticPaths() {
+  const posts = await getPosts()
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: { post, older: posts[i + 1] ?? null, newer: posts[i - 1] ?? null, all: posts },
+  }))
+}
+
+interface Props {
+  post: Post
+  older: Post | null
+  newer: Post | null
+  all: Post[]
+}
+
+const { post, older, newer, all } = Astro.props
+const { Content, headings } = await render(post)
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3)
+const minutes = readingTime(post.body)
+const relatedPosts = related(post, all)
+---
+
+<Site title={`${post.data.title} — ansh.life`} description={post.data.description}>
+  <div class="mx-[var(--frame)] mt-[calc(var(--nav-h)+2rem)] pt-6 pb-32">
+    <div class="grid gap-12 lg:grid-cols-12">
+      <!-- table of contents: sticky beside the article on wide screens, collapsible on small ones -->
+      <aside class="lg:col-span-3">
+        <a href="/blog/" class="caption text-muted-foreground hover:text-foreground">← all writing</a>
+        {
+          toc.length > 0 && (
+            <nav aria-label="on this page" class="mt-10 hidden lg:sticky lg:top-[calc(var(--nav-h)+2rem)] lg:block">
+              <p class="caption mb-3 text-muted-foreground">on this page</p>
+              <ol class="space-y-2 border-l border-border text-[13px] leading-snug">
+                {toc.map((h) => (
+                  <li class={h.depth === 3 ? "pl-7" : "pl-4"}>
+                    <a href={`#${h.slug}`} class="text-body transition-colors hover:text-foreground">
+                      {h.text}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )
+        }
+      </aside>
+
+      <article class="min-w-0 lg:col-span-8 xl:col-span-7">
+        <header class="mb-14">
+          <h1 class="text-4xl font-medium leading-[1.02] tracking-[-0.045em] text-balance md:text-6xl">{post.data.title}</h1>
+          <p class="mt-6 text-pretty text-lg leading-relaxed text-body md:text-xl">{post.data.description}</p>
+          <p class="caption mt-6 text-muted-foreground tabular-nums">
+            {formatDate(post.data.date)} / {minutes} min read
+          </p>
+          {
+            toc.length > 0 && (
+              <details class="mt-8 border-y border-border py-4 lg:hidden">
+                <summary class="caption cursor-pointer text-muted-foreground">on this page</summary>
+                <ol class="mt-4 space-y-2 text-[14px]">
+                  {toc.map((h) => (
+                    <li class={h.depth === 3 ? "pl-4" : ""}>
+                      <a href={`#${h.slug}`} class="text-body hover:text-foreground">
+                        {h.text}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            )
+          }
+        </header>
+
+        <div class="post">
+          <Content />
+        </div>
+
+        <footer class="mt-20 border-t border-border pt-8">
+          <p class="caption flex flex-wrap gap-3 text-muted-foreground">
+            {post.data.tags.map((t) => <span>#{t}</span>)}
+          </p>
+
+          {
+            relatedPosts.length > 0 && (
+              <div class="mt-14">
+                <h2 class="caption mb-4 text-muted-foreground">related writing</h2>
+                <ul class="border-t border-border">
+                  {relatedPosts.map((p) => (
+                    <li class="border-b border-border">
+                      <a href={`/blog/${p.id}/`} class="flex items-baseline justify-between gap-6 py-4 hover:opacity-70">
+                        <span class="font-medium">{p.data.title}</span>
+                        <span class="caption shrink-0 text-muted-foreground">{formatDate(p.data.date)}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          }
+
+          <nav class="mt-14 grid gap-6 sm:grid-cols-2" aria-label="more posts">
+            {
+              older ? (
+                <a href={`/blog/${older.id}/`} class="group">
+                  <span class="caption text-muted-foreground">← older</span>
+                  <span class="mt-1 block font-medium group-hover:opacity-70">{older.data.title}</span>
+                </a>
+              ) : (
+                <span />
+              )
+            }
+            {
+              newer && (
+                <a href={`/blog/${newer.id}/`} class="group sm:text-right">
+                  <span class="caption text-muted-foreground">newer →</span>
+                  <span class="mt-1 block font-medium group-hover:opacity-70">{newer.data.title}</span>
+                </a>
+              )
+            }
+          </nav>
+        </footer>
+      </article>
+    </div>
+  </div>
+</Site>

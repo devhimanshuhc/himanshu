@@ -1,0 +1,20 @@
+---
+// An interactive isometric figure (built with the anatomy kit) embedded in a post.
+// The figure is a standalone page in /public, isolated in an iframe so its own
+// CSS and animation loop never touch the article.
+interface Props {
+  src: string
+  title: string
+  /** width / height of the figure card */
+  ratio?: string
+  caption?: string
+}
+const { src, title, ratio = "16 / 10", caption } = Astro.props
+---
+
+<figure class="not-prose my-12">
+  <div class="overflow-hidden border border-border bg-card" style={`aspect-ratio: ${ratio}`}>
+    <iframe src={src} title={title} loading="lazy" class="h-full w-full border-0"></iframe>
+  </div>
+  {caption && <figcaption class="mt-3 text-[13px] leading-relaxed text-muted-foreground">{caption}</figcaption>}
+</figure>

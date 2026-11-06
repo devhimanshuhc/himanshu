@@ -1,0 +1,112 @@
+---
+title: "Medurun"
+tagline: "Real-time ambulance dispatch for patients, drivers and agencies"
+summary: "A patient books an ambulance, the backend finds the closest free one by live driving time, offers the ride to a few drivers and lets exactly one of them take it. I built the dispatch engine, the rider and driver apps and the dashboards."
+kicker: "Client work at Heizen, emergency dispatch"
+role: "Full stack engineer (Heizen)"
+timeline: "Jun 2026 - present"
+stack: ["TypeScript", "NestJS", "PostgreSQL", "Prisma", "Redis", "Lua", "Socket.IO", "BullMQ", "React Native (Expo)", "Next.js", "CASL", "Turborepo"]
+links:
+  live: "https://medurun.com/"
+order: 3
+tldr:
+  problem: "In an emergency the nearest ambulance on a map is often not the fastest one by road, and two drivers tapping Accept at the same moment must never both get the trip. Location updates also arrive every second from every online driver."
+  built: "A NestJS dispatch engine that shortlists drivers with a Redis geo search, ranks them by traffic-aware driving time, offers the ride to the top few and settles Accept with one atomic Lua script. Around it sit React Native rider and driver apps, Next.js dashboards for agencies and the platform team, and a public website."
+  outcome: "The full booking loop works end to end: request, ranked offers, single claim, live tracking in a shared trip room, PIN check at pickup, completion and payment. The product is pre-launch."
+stats:
+  - { value: "6", label: "apps in one monorepo: API, rider, driver, agency, admin and website" }
+  - { value: "30", label: "NestJS feature modules in the backend" }
+  - { value: "8", label: "trip states, from searching to completed or cancelled" }
+  - { value: "346", label: "of the repo's 362 commits are mine" }
+architecture:
+  - { name: "Rider app", desc: "React Native (Expo) app where a patient picks an ambulance type, sets pickup and drop, and watches the assigned ambulance move on a map." }
+  - { name: "Driver app", desc: "React Native (Expo) app for going on and off duty, streaming GPS, receiving ride offers and running the trip from pickup PIN to payment." }
+  - { name: "Realtime gateway", desc: "Two Socket.IO namespaces, one for drivers and one for riders. Drivers re-register on reconnect so the server restores their state, trip room and any pending offers." }
+  - { name: "Location buffer", desc: "Keeps the latest point per driver in memory and writes only changed drivers to the Redis geo index every 750 ms in one pipeline." }
+  - { name: "Matching", desc: "Redis GEOSEARCH shortlists nearby drivers, Postgres filters out anyone off duty, unapproved or blocked, and the Google Routes matrix ranks the rest by driving time." }
+  - { name: "Trip claim", desc: "A Lua script checks the trip is still on offer and the driver is free, then binds trip, driver, ambulance and patient in one atomic step." }
+  - { name: "Trip room", desc: "After Accept, driver and rider join one room per trip. Driver locations go straight to that room instead of the geo index." }
+  - { name: "Dashboards", desc: "Next.js apps for agencies and for the platform team, with CASL roles for operations, finance, marketing and super admin." }
+  - { name: "Jobs and payments", desc: "BullMQ sends emails with retries off the request path. Payments go through Cashfree with signed webhooks, and admins track payouts per driver and agency." }
+decisions:
+  - title: "Rank by driving time, not distance"
+    problem: "A driver 2 km away across a river can take longer than one 5 km away on a main road. Straight-line distance picks the wrong ambulance."
+    decision: "Geo search is only a cheap shortlist, capped at 20 drivers. The Google Routes matrix ranks those by traffic-aware ETA, drops anyone over the max ETA, and falls back to a distance estimate if a row has no ETA."
+  - title: "Greedy per trip, not batched matching"
+    problem: "Ride-hailing systems often batch riders and drivers to optimise the whole network. Ambulances are scarce and every request is urgent."
+    decision: "Each trip gets the fastest available ambulance for that patient. If too few drivers are found, the search widens to a larger radius once before giving up."
+  - title: "One Lua script decides who wins"
+    problem: "A ride is offered to several drivers at once, so two can accept in the same millisecond. Read then write from Node leaves a gap where both pass the check."
+    decision: "Accept runs a short Lua script that checks trip status and the driver's active-trip key and writes all the bindings in one go. It runs inside a Postgres transaction that also locks the driver's document status, and the trip row is only updated if the claim wins."
+  - title: "Buffer GPS before it hits Redis"
+    problem: "Every online driver sends a location every second or so, and most of those writes would be overwritten before anyone searches."
+    decision: "The gateway keeps only the latest point per driver in memory and flushes changed ones every 750 ms. Drivers on a trip skip the geo index and stream to their trip room."
+  - title: "Dispatch knobs live in platform settings"
+    problem: "Search radius, max ETA and how many drivers get an offer depend on the city and fleet size, and will change after launch."
+    decision: "The values ship as defaults in the shared package and are read from platform settings at request time, so the ops team can tune them from the admin dashboard without a deploy."
+related: []
+---
+
+## Context
+
+Medurun is an ambulance booking platform I work on as a client project at Heizen. A patient opens the rider app, picks an ambulance type and a pickup point, and the system finds a nearby ambulance, offers it the ride and tracks it to the patient and then to the hospital. Agencies run fleets of ambulances and drivers, and some drivers work on their own.
+
+I started the repo in June 2026 and have written most of it: 346 of its 362 commits. I designed the dispatch engine and built across the stack, from the NestJS backend to the two React Native apps and the Next.js dashboards. The product hasn't launched yet. The public website is live at medurun.com.
+
+The code is a Bun and Turborepo monorepo with six apps and five shared packages. The apps are the NestJS API, the rider app, the driver app, the agency dashboard, the platform admin dashboard and the marketing website. The packages hold the Prisma schema, shared types and constants, CASL permission rules, UI components and TypeScript config. Postgres holds the durable records. I put everything that changes by the second in Redis: the geo index of online drivers, trip status, who was offered what and who is busy.
+
+## What's in it
+
+### Going online and streaming location
+
+A driver connects to the driver Socket.IO namespace when they go on duty, not when they open the app. I kept profile, history and earnings on plain REST, since none of that needs a socket.
+
+Location updates go one of two ways. If the driver has no active trip, the point goes into an in-memory buffer that keeps only the latest location per driver. Every 750 ms the buffer writes the changed drivers to a Redis geo set in a single pipeline. If the write fails, those drivers are marked dirty again and go out on the next flush. If the driver is on a trip, the point skips the geo index and goes straight to the trip room, and the last point is saved in Redis so a rider who reconnects sees the ambulance right away.
+
+Mobile networks drop all the time, and I didn't want a dropped socket to cost anyone a ride. When the driver app reconnects it registers again with its current state. The server puts it back in its trip room if it has one and replays any ride offers that are still open for it.
+
+### Finding the nearest ambulance
+
+A ride request runs three steps. I wanted the cheap filters first and the paid API call last.
+
+- `GEOSEARCH` on the online-drivers set around the pickup, sorted by distance.
+- A Postgres filter that keeps drivers who are on duty, approved, of the requested ambulance type, in an active city and not blocked for expired documents. If fewer than the configured minimum are left, the search runs again with a wider radius.
+- A Google Routes matrix call for at most 20 candidates, then a sort by ETA with anyone over the max ETA removed.
+
+The ranked list is saved on the trip and the top few drivers get an offer over the socket. Nobody waits on a driver who said no. When a driver declines, their slot is refilled from the next drivers on the list who haven't declined and aren't busy.
+
+### Accepting a ride
+
+Several drivers see the same offer, so Accept is where things can go wrong. This was the part I spent the most time on. The check for "is this trip still open and is this driver free" and the writes that assign it have to happen as one step.
+
+I made that step a Lua script of about fifteen lines. Redis doesn't interleave other commands while a script runs, so two Accepts for the same trip can't both pass. I looked at Redlock too, but it only gives you a lock, and you'd still have to update the trip after taking it. On one Redis, the script is simpler and does the whole job. The script reads the trip status, rejects the claim if it is no longer on offer or if the driver already has a trip, and otherwise writes the new status, the driver, the ambulance and the active-trip keys for both driver and patient. The loser gets a "ride already taken" event and the offer disappears from the other drivers' screens.
+
+The claim runs inside a Postgres transaction. The transaction first checks the driver and ambulance aren't blocked for documents, holding row locks so an admin block can't land halfway through. The trip row is updated only after the script returns success. If Redis was flushed, the trip's claimable status is re-seeded from Postgres with `SET NX` before the claim.
+
+### On the trip
+
+After Accept, the driver and the rider join one Socket.IO room per trip. A small bridge service emits to that room on both namespaces, so either side can push status changes and the rider sees the driver's location move. Approach push notifications fire off the same stream. It's one source of truth for where the ambulance is.
+
+At pickup the driver asks the patient for a 4-digit PIN that was generated at Accept. The trip only moves to in progress when it matches, and wrong attempts are capped. Then the driver completes the trip and payment is collected. The PIN means a driver can't mark the patient as picked up until they're actually standing with them.
+
+### Dashboards, payments and the rest
+
+The agency dashboard covers ambulances, drivers, documents, live rides on a map, ride history and revenue. The admin dashboard covers agency and driver approval, document expiry with reminders and blocks, pricing with surge hours, payouts, analytics and dispatch settings. Access is enforced with CASL, with separate rule sets for operations, finance, marketing and super admin.
+
+Payments go through Cashfree, and the webhook handler rejects anything with a bad signature. Emails go through a BullMQ queue with three attempts and a fixed backoff, so a slow mail server never holds up a request.
+
+## Constraints
+
+- Urgency over network efficiency. Every trip gets the best ambulance for that patient, not the best global assignment.
+- Exactly one driver per trip, even when several accept at once.
+- GPS arrives far more often than anyone searches, so writes to Redis had to be bounded.
+- Mobile connections drop. Drivers and riders must recover their state on reconnect without losing an offer or a trip.
+- Paid map API calls had to be bounded, so the route matrix only ever sees a short list.
+- Dispatch settings had to be tunable without a deploy.
+
+## Results
+
+- The full loop works end to end: request, ranked offers, a single winning Accept, live tracking, PIN at pickup, completion and payment.
+- 6 apps and 5 shared packages in one monorepo, with 30 feature modules in the NestJS backend and 8 trip states (counted from the repo).
+- 346 of the repo's 362 commits are mine, from June to October 2026 (git log).
+- The product is pre-launch, so there are no usage numbers yet. The public site is live at medurun.com.

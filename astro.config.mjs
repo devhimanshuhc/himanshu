@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 
 import react from '@astrojs/react';
+import mdx from '@astrojs/mdx';
 
 import vercel from '@astrojs/vercel';
 
@@ -16,10 +17,13 @@ export default defineConfig({
       plugins: [tailwindcss()]
     },
 
-  integrations: [react()],
+  markdown: {
+    shikiConfig: { theme: 'github-light' },
+  },
+  integrations: [react(), mdx()],
   adapter: vercel(),
   redirects: {
-    "/cv": "https://drive.google.com/file/d/1j7_bh8uG6rYlVssZpsvVDMz9-WrMLx18/view?usp=drive_link",
+    "/cv": "/resume/",
     "/pf": "/me"
   }
 });

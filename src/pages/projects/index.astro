@@ -1,0 +1,62 @@
+---
+import Site from "@/layouts/Site.astro"
+import { getProjects, host } from "@/lib/projects"
+
+const projects = await getProjects()
+const pad = (n: number) => String(n).padStart(2, "0")
+---
+
+<Site
+  title="projects — ansh.life"
+  description="things i've built: ai products at work and open source on the side, each with a write-up of how it works."
+>
+  <section class="mx-[var(--frame)] mt-[calc(var(--nav-h)+2rem)] pt-6 pb-32 md:pb-48">
+    <div class="grid gap-10 md:grid-cols-12">
+      <p class="caption text-muted-foreground md:col-span-3">(projects)</p>
+      <div class="md:col-span-9">
+        <h1 data-split="lines" class="text-5xl font-medium leading-none tracking-[-0.05em] md:text-7xl">
+          things i've <span class="accent">built</span>.
+        </h1>
+        <p class="mt-6 max-w-md text-pretty text-[15px] leading-relaxed text-body md:text-base">
+          products at work and open source on the side. every write-up has a reading depth switch: 30 seconds for the
+          outcome, 3 minutes for the architecture, or the deep dive.
+        </p>
+      </div>
+    </div>
+
+    <ol class="mt-20 border-t border-border md:mt-28">
+      {
+        projects.map((p, i) => (
+          <li class="border-b border-border">
+            <div class="group relative grid gap-x-6 gap-y-3 py-8 md:grid-cols-12 md:py-10">
+              <span class="caption text-muted-foreground tabular-nums md:col-span-1">{pad(i + 1)}</span>
+              <div class="md:col-span-7">
+                <p class="caption text-muted-foreground">{p.data.kicker}</p>
+                <h2 class="mt-2 text-3xl font-medium tracking-[-0.04em] transition-transform duration-500 group-hover:translate-x-2 md:text-5xl">
+                  <a href={`/projects/${p.id}/`} class="after:absolute after:inset-0">
+                    {p.data.title}
+                  </a>
+                </h2>
+                <p class="mt-3 max-w-xl text-pretty text-[15px] leading-relaxed text-body">{p.data.summary}</p>
+                <p class="caption mt-4 text-muted-foreground">{p.data.stack.slice(0, 5).join(" · ")}</p>
+              </div>
+              <div class="caption relative z-10 flex flex-wrap items-start gap-x-5 gap-y-2 md:col-span-4 md:justify-end">
+                <a href={`/projects/${p.id}/`} class="text-foreground hover:opacity-70">read more →</a>
+                {p.data.links.live && (
+                  <a href={p.data.links.live} target="_blank" rel="noopener noreferrer" class="text-body hover:text-foreground">
+                    {host(p.data.links.live)} ↗
+                  </a>
+                )}
+                {p.data.links.source && (
+                  <a href={p.data.links.source} target="_blank" rel="noopener noreferrer" class="text-body hover:text-foreground">
+                    source ↗
+                  </a>
+                )}
+              </div>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+</Site>

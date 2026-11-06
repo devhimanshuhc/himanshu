@@ -1,0 +1,96 @@
+---
+title: "DataSays"
+tagline: "Ask your data a question in plain English, get SQL and a chart"
+summary: "Connect a CSV, MySQL, BigQuery, Snowflake or HubSpot source and ask questions the way you would ask an analyst. An LLM agent writes the query, runs it, works through the rows and answers with tables, charts, dashboards or slides."
+kicker: "Product, AI analytics"
+role: "Full stack builder"
+timeline: "Oct 2025 – Jun 2026"
+stack: ["Next.js", "NestJS", "PostgreSQL", "pgvector", "Prisma", "BullMQ", "LangGraph", "Vercel AI SDK", "OpenAI", "Gemini", "FastAPI", "Stripe"]
+links:
+  live: "https://datasays.app/"
+order: 6
+tldr:
+  problem: "Most people who need an answer from their data can't write SQL, and the person who can is busy. Copying a question into a chatbot doesn't help, because it can't see the schema or run anything."
+  built: "A chat app with a tool calling agent on top of your data sources. It reads the schema, writes one SELECT, runs it, runs generated analysis code in a sandboxed worker, and answers with a chart, table, dashboard or slide deck. CSV uploads get a retrieval graph with hybrid search and text to SQL."
+  outcome: "It is built as a full product for datasays.app, with sign-up, organisations, plan limits and Stripe billing. Five source types are wired in, and the CSV path picks between search and SQL per question instead of always doing both."
+stats:
+  - { value: "5", label: "source types: CSV, MySQL, BigQuery, Snowflake, HubSpot" }
+  - { value: "50,000", label: "row cap on generated analysis code" }
+  - { value: "30 s", label: "timeout before the analysis worker thread is killed" }
+  - { value: "2", label: "query rewrites at most before the retrieval graph gives up" }
+architecture:
+  - { name: "Web app", desc: "Next.js app for chat, data source setup, dashboards, organisations and billing. Answers stream in word by word with tool steps shown as they run." }
+  - { name: "API", desc: "NestJS service with Prisma on Postgres. It owns auth, chats, data sources, quotas and Stripe subscriptions." }
+  - { name: "Chat agent", desc: "Vercel AI SDK streamText with up to 25 tool steps. The tools it gets depend on the active source type." }
+  - { name: "Connectors", desc: "One connector per source. MySQL runs SQL directly, while BigQuery, Snowflake and HubSpot connect over OAuth and are queried through MCP clients." }
+  - { name: "Metadata store", desc: "Tables, columns, types, keys, sample values and stats per source, so the model writes SQL against real names." }
+  - { name: "CSV ingestion", desc: "A BullMQ worker streams the file in batches and writes each batch twice in parallel, as embedded chunks in pgvector and as JSONB rows for SQL." }
+  - { name: "Retrieval graph", desc: "LangGraph flow for CSV questions that classifies the question, runs hybrid search, text to SQL or both, grades the results and rewrites the query if nothing fits." }
+  - { name: "Analysis sandbox", desc: "Generated JavaScript runs on the query rows in a worker thread with a row cap and a timeout, so a bad loop can't take the server down." }
+  - { name: "Outputs", desc: "Tools for charts, tables, dashboards and slide decks, with decks exported to PowerPoint." }
+decisions:
+  - title: "Store every CSV twice"
+    problem: "Some questions about a CSV are lookups like rows about refunds, and some are aggregates like average order value by month. Vector search is bad at sums and SQL is bad at fuzzy text."
+    decision: "Ingestion writes each batch to two stores at once, embeddings in pgvector and raw rows as JSONB. A small classifier picks search, SQL or both for each question, so aggregates get exact numbers and lookups still work."
+  - title: "Hybrid search fused by rank"
+    problem: "Dense embeddings miss exact terms like product codes, and Postgres full text misses paraphrases."
+    decision: "Search runs both, pgvector cosine distance and Postgres full text, and merges them with reciprocal rank fusion. A grader drops irrelevant chunks, and if nothing survives the query is rewritten, at most twice."
+  - title: "Treat generated SQL and code as untrusted"
+    problem: "The model writes the SQL and the analysis code, and either can be wrong or dangerous. A runaway loop on a large result would block the API for everyone."
+    decision: "CSV SQL must be a single SELECT on csv_rows, is rejected if it contains write or DDL keywords, and gets the data source filter added if the model forgot it. Analysis code runs in a worker thread capped at 50,000 rows and killed after 30 seconds."
+  - title: "Warehouses through MCP, not hand written clients"
+    problem: "BigQuery, Snowflake and HubSpot each have their own APIs and auth, and writing a full client for each would eat most of the time."
+    decision: "Each one connects with OAuth and is called through an MCP client, with a discover tool and a call tool per source. The agent only gets the tools for the source that is active in the chat."
+related: []
+---
+
+## Context
+
+DataSays is a product I build mostly on my own, under its own GitHub organisation. The repo's private, so I'll stick to the shape of the system here. It started in late October 2025 as a Slack bot that answered questions over a BigQuery warehouse, then grew into a web app with its own sign-up, organisations, plans and billing.
+
+I split it into three parts. A Next.js web app, a NestJS API with Prisma on Postgres, and a small FastAPI service that runs the Slack bot. The API does the real work. It holds the chat agent, the connectors, the ingestion queue and the retrieval graph.
+
+## What's in it
+
+### The chat agent
+
+A question goes to the API, which loads the chat history and the active data source, then calls `streamText` from the Vercel AI SDK with up to 25 tool steps. The tools are picked per source type, so a MySQL chat gets `execute_sql` and a Snowflake chat gets the Snowflake discover and call tools. The answer streams back word by word. I show each tool step as it starts, so you can see what it's doing and where it went wrong.
+
+The usual run is: generate SQL, execute it, generate analysis code if the question needs more than the raw rows, run that code, then render a chart or table. The same tools can build a dashboard or a slide deck, and decks export to PowerPoint.
+
+### Schema and metadata
+
+A model won't write good SQL unless it sees the real schema. When a source connects, the API pulls tables, columns, types, primary and foreign keys, nullability, sample values and basic stats into a metadata table. That metadata goes into the prompt, and the SQL prompts tell the model to use only those names.
+
+### CSV ingestion
+
+I moved uploads off the request and onto a BullMQ worker. The worker streams the file in batches with `fast-csv`, so a large file is never fully in memory. Each batch is written to two places in parallel: embedded chunks in `csv_chunks` using OpenAI `text-embedding-3-small` and pgvector, and raw rows as JSONB in `csv_rows`. Progress is reported as bytes read. When it's done, the source flips to active or failed.
+
+### The retrieval graph
+
+CSV questions go through a LangGraph state graph before the agent sees them. A classifier using `gpt-4.1-mini` labels the question as sql, semantic or both. SQL questions go to text to SQL over `csv_rows`. Semantic ones go to hybrid search, which runs a pgvector query and a Postgres full text query and fuses them with reciprocal rank fusion. Compound questions run both.
+
+A grading step keeps only the chunks that are relevant. If nothing useful came back, the graph rewrites the question and tries again. I capped that at two rewrites so a bad question can't loop and keep spending calls. The result is added to the system prompt as context. If the graph fails, the chat doesn't stop; it just goes on without it.
+
+### Guardrails on generated code
+
+I don't trust anything the model writes, so generated CSV SQL is cleaned and checked before it runs. It must start with SELECT, must not contain write or DDL keywords, and must hit `csv_rows`. If it doesn't filter by data source, the filter is added. Generated analysis code runs in a Node worker thread against at most 50,000 rows, and the worker is terminated after 30 seconds.
+
+### Accounts and billing
+
+Users sign in with email OTP or Google. I wanted billing in from the start, since every question costs me model calls. Chats belong to users and organisations, with roles and invitations. Plans live in the database and are synced with Stripe. A quota service enforces daily, monthly and total question limits per plan and returns a typed error the web app can show as an upgrade prompt.
+
+## Constraints
+
+- Mostly one developer across the web app, API, agents and deployment.
+- Every query and every piece of analysis code is written by a model, so nothing it produces can be trusted to be safe or correct.
+- Each warehouse has different auth and query APIs, and the agent has to handle all of them without one code path per question.
+- LLM calls cost money, so usage has to be limited per plan from the start.
+
+## Results
+
+- Five source types connected: CSV, MySQL, BigQuery, Snowflake and HubSpot.
+- Answers come back as text, tables, charts, dashboards or PowerPoint decks.
+- Analysis code is capped at 50,000 rows and 30 seconds per run.
+- The retrieval graph retries at most twice, so a bad question can't loop.
+- Stripe subscriptions and per plan question limits are in place.
