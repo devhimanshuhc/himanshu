@@ -6,7 +6,6 @@
 @import "@fontsource/instrument-serif/latin-400-italic.css";
 
 @import "tailwindcss";
-@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -206,6 +205,9 @@ html.js:not(.reduced-motion) [data-hero-fade] {
 .panel-in {
     animation: panel-in 0.7s var(--ease-out-expo) both;
 }
+.zoom-in {
+    animation: zoom-in 0.7s ease both;
+}
 @keyframes title-in {
     from {
         transform: translateY(100%);
@@ -224,9 +226,16 @@ html.js:not(.reduced-motion) [data-hero-fade] {
         transform: none;
     }
 }
+@keyframes zoom-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
 @media (prefers-reduced-motion: reduce) {
     .explorer-title,
-    .panel-in {
+    .panel-in,
+    .zoom-in {
         animation: none;
     }
 }

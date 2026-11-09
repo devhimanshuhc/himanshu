@@ -481,7 +481,7 @@ function ProjectTag({
       className={cn(active ? "pointer-events-none" : opening ? "hidden" : "hidden opacity-30 transition-opacity duration-300 hover:opacity-100 md:block")}
     >
       {active ? (
-        <div className="animate-in fade-in zoom-in-95 relative h-[190px] w-[min(70vw,300px)] duration-700 md:h-[230px]">
+        <div className="zoom-in relative h-[190px] w-[min(70vw,300px)] md:h-[230px]">
           {["left-0 top-0 border-l border-t", "right-0 top-0 border-r border-t", "bottom-0 left-0 border-b border-l", "bottom-0 right-0 border-b border-r"].map(
             (c) => (
               <span key={c} className={cn("absolute size-3.5 border-[#edeae3]", c)} />

@@ -178,7 +178,7 @@ export const CONTENT = {
       label: "Retro",
       description:
         "An actor-based multi-agent research system. Agents run as isolated BullMQ workers and write cited reports; a crashed step resumes without a duplicate report, and failed jobs replay.",
-      image: "/projects/retro.jpg",
+      image: "/projects/retro.webp",
       category: "Multi-agent AI",
       tech: ["TypeScript", "BullMQ", "Redis", "LLM agents"],
       link: "https://retro.ansh.life",
@@ -190,7 +190,7 @@ export const CONTENT = {
       label: "Evra",
       description:
         "AI healthcare for 3k+ users. LLM summarization and RAG over patient records cut clinical data entry 40% — MongoDB vector search and LangChain on FastAPI, encrypted clinical fields, clinician auth and a React Native app.",
-      image: "/projects/evra.jpg",
+      image: "/projects/evra.webp",
       category: "AI healthcare · Heizen",
       tech: ["FastAPI", "LangChain", "MongoDB vector search", "React Native"],
       link: "https://evrahealth.com/",
@@ -202,7 +202,7 @@ export const CONTENT = {
       label: "Medurun",
       description:
         "Real-time ambulance dispatch: Redis geospatial search, Socket.IO, atomic Lua and BullMQ behind NestJS, with React Native rider and driver apps and Next.js dashboards.",
-      image: "/projects/medurun.jpg",
+      image: "/projects/medurun.webp",
       category: "Dispatch · Heizen",
       tech: ["NestJS", "Redis geo", "Socket.IO", "React Native"],
       link: "https://medurun.com/",
@@ -214,7 +214,7 @@ export const CONTENT = {
       label: "EquityNav",
       description:
         "AI insight agents for vesting, exercises and liquidity on the Vercel AI SDK, with tool calling, SQL execution, structured outputs and guardrails — plus Carta-synced projection, scenario and risk dashboards.",
-      image: "/projects/equitynav.jpg",
+      image: "/projects/equitynav.webp",
       category: "Equity AI · Heizen",
       tech: ["Vercel AI SDK", "OpenAI", "Gemini", "NestJS"],
       link: "#",
@@ -225,7 +225,7 @@ export const CONTENT = {
       key: "quotient",
       label: "Quotient",
       description: "A writing workspace with fast capture and notebooks — Keep-style notes in a clean editor on a fast Next.js stack.",
-      image: "/projects/quotient.jpg",
+      image: "/projects/quotient.webp",
       category: "Productivity",
       tech: ["Next.js", "Prisma", "Neon"],
       link: "https://quotient-dun.vercel.app/",
@@ -236,7 +236,7 @@ export const CONTENT = {
       key: "datasays",
       label: "DataSays",
       description: "Plain-English questions return SQL and a chart — an LLM analysis layer for querying and visualizing datasets.",
-      image: "/projects/datasays.jpg",
+      image: "/projects/datasays.webp",
       category: "AI analytics",
       tech: ["LLMs", "SQL", "TypeScript"],
       link: "https://datasays.app/",
