@@ -81,7 +81,7 @@ This document provides instructions and guidelines for AI agents operating withi
 
 - `src/components/`: Reusable UI components.
   - `ui/`: Primitives (Buttons, Cards, etc.) following Shadcn UI.
-- `src/layouts/`: Astro layouts (e.g., `main.astro`).
+- `src/layouts/`: Astro layouts (e.g., `Site.astro`).
 - `src/lib/`: Utilities (`utils.ts`) and data (`content.ts`).
 - `src/pages/`: Route definitions (`index.astro`).
 - `src/styles/`: Global styles (`global.css`).

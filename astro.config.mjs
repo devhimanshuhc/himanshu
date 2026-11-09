@@ -26,12 +26,13 @@ export default defineConfig({
   integrations: [
     react(),
     mdx(),
-    // leftover astro starter page; keep it out of search
-    sitemap({ filter: (page) => !page.includes("/markdown-page") }),
+    sitemap(),
   ],
   adapter: vercel(),
   redirects: {
     "/cv": "/resume/",
-    "/pf": "/me"
+    "/pf": "/me",
+    // old resume url, kept so previously shared links still resolve
+    "/resume-hc.pdf": "/resume.pdf"
   }
 });
