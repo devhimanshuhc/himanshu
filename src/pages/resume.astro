@@ -13,8 +13,8 @@ import { inline, RESUME as R } from "@/lib/resume"
         </h1>
         <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
           <a
-            href="/resume.pdf"
-            download="himanshu-chauhan-resume.pdf"
+            href="/Himanshu_Chauhan_AI_Engineer.pdf"
+            download="Himanshu_Chauhan_AI_Engineer.pdf"
             class="caption inline-flex items-center gap-2 bg-foreground px-4 py-3 text-background transition-opacity hover:opacity-80"
           >
             download pdf ↓
@@ -28,15 +28,21 @@ import { inline, RESUME as R } from "@/lib/resume"
       <div class="md:col-span-9 md:col-start-4">
         <header>
           <h2 class="text-3xl font-medium tracking-[-0.04em] md:text-4xl">{R.name}</h2>
-          <p class="mt-1 text-lg text-body">{R.headline}</p>
+          <p class="mt-1 text-lg text-body">
+            {R.headline}<span class="r-location text-muted-foreground"> · {R.location}</span>
+          </p>
           <p class="r-contact mt-4 flex flex-wrap gap-x-2 text-[14px] text-body">
             {
               R.contact.map((c, i) => (
                 <>
                   {i > 0 && <span aria-hidden="true">|</span>}
-                  <a href={c.href} class="underline-offset-4 hover:underline">
-                    {c.label}
-                  </a>
+                  {c.href ? (
+                    <a href={c.href} class="underline-offset-4 hover:underline">
+                      {c.label}
+                    </a>
+                  ) : (
+                    <span>{c.label}</span>
+                  )}
                 </>
               ))
             }
@@ -99,6 +105,24 @@ import { inline, RESUME as R } from "@/lib/resume"
               ))
             }
           </ul>
+        </section>
+
+        <section>
+          <h3>education</h3>
+          {
+            R.education.map((e) => (
+              <div class="r-edu">
+                <div class="r-row">
+                  <p>
+                    <strong class="font-medium">{e.school}</strong>
+                    <span class="text-muted-foreground"> | {e.location}</span>
+                  </p>
+                  <p class="r-dates">{e.dates}</p>
+                </div>
+                <p class="r-text">{e.degree}</p>
+              </div>
+            ))
+          }
         </section>
       </div>
     </article>
@@ -180,7 +204,7 @@ import { inline, RESUME as R } from "@/lib/resume"
   /* print: just the sheet, on white A4. `pnpm resume:pdf` prints this. */
   @page {
     size: A4;
-    margin: 10mm 12mm;
+    margin: 8mm 11mm;
   }
   @media print {
     html,
@@ -200,7 +224,7 @@ import { inline, RESUME as R } from "@/lib/resume"
       color: #141414;
     }
     .resume section {
-      margin-top: 8pt;
+      margin-top: 6pt;
       break-inside: auto;
     }
     .resume .r-job,
@@ -208,25 +232,26 @@ import { inline, RESUME as R } from "@/lib/resume"
       break-inside: avoid;
     }
     .resume header h2 {
-      font-size: 21pt;
+      font-size: 20pt;
+      line-height: 1.1;
     }
     .resume header p {
       font-size: 10.5pt;
     }
     .resume .r-contact {
-      margin-top: 4pt;
+      margin-top: 2pt;
       font-size: 9pt !important;
     }
     .resume h3 {
       font-size: 8pt;
-      margin-bottom: 5pt;
-      padding-bottom: 3pt;
+      margin-bottom: 4pt;
+      padding-bottom: 2pt;
       color: #555;
     }
     .resume .r-text,
     .resume li {
-      font-size: 9pt;
-      line-height: 1.38;
+      font-size: 8.8pt;
+      line-height: 1.33;
       color: #2a2a2a;
     }
     .resume ul li + li {

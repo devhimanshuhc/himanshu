@@ -1,12 +1,17 @@
 /**
  * The resume, as data. /resume renders it and `pnpm resume:pdf` prints that
- * page to public/resume.pdf, so the page and the download never drift apart.
+ * page to public/Himanshu_Chauhan_AI_Engineer.pdf, so the page and the download never drift apart.
  * Inline `**bold**` and `[text](url)` are supported in summary and bullets.
  */
 export interface ResumeRole {
   title: string
   dates: string
   bullets: string[]
+}
+
+export interface ResumeContact {
+  label: string
+  href?: string
 }
 
 export interface ResumeJob {
@@ -22,13 +27,15 @@ export const RESUME = {
   headline: "AI Engineer | LLMs, RAG & Agents",
   updated: "Nov 2026",
   contact: [
+    { label: "+91 85338 60335", href: "tel:+918533860335" },
     { label: "himanshu.chauhan07@icloud.com", href: "mailto:himanshu.chauhan07@icloud.com" },
     { label: "ansh.life", href: "https://www.ansh.life" },
     { label: "github.com/himanshu-dev-codes", href: "https://github.com/himanshu-dev-codes" },
     { label: "linkedin.com/in/devhimanshuhc", href: "https://linkedin.com/in/devhimanshuhc" },
-  ],
+  ] satisfies ResumeContact[],
+  location: "Dehradun, India · Open to relocation (Malaysia)",
   summary:
-    "AI engineer with 1.5+ years shipping production LLM features: retrieval-augmented generation over clinical records, tool-calling agents for equity workflows, and an agentic mobile browser. Python, FastAPI, LangChain and the Vercel AI SDK. Builds with **Claude Code**. Based in Dehradun, India.",
+    "Software engineer with 2+ years of experience, including 1.5+ years shipping production **Generative AI** and LLM features: retrieval-augmented generation over clinical records, tool-calling agents for equity workflows, and an agentic mobile browser. Python, FastAPI, LangChain, Vercel AI SDK, REST APIs and microservices. Builds with **Claude Code**.",
   experience: [
     {
       company: "Heizen",
@@ -40,7 +47,7 @@ export const RESUME = {
           title: "Software Development Engineer",
           dates: "Jun 2026 – Oct 2026",
           bullets: [
-            "**[Evra](https://evrahealth.com/) (AI healthcare, 3k+ users):** Cut clinical data entry **40%** by shipping LLM summarization and **RAG** over patient records. MongoDB vector search and LangChain on **FastAPI**, with Fernet-encrypted clinical fields, role-based clinician auth and a React Native (Expo) app.",
+            "**[Evra](https://evrahealth.com/) (AI healthcare, 3k+ users):** Cut clinical data entry **40%** by shipping LLM summarization and **RAG** over patient records. MongoDB vector search and LangChain on **FastAPI**, with encrypted clinical fields, role-based auth and a React Native (Expo) app.",
             "**Heizen Studio (open-source AI dev tools, 5K+ users):** Owned system architecture, API contracts and delivery end to end.",
             "**[Medurun](https://medurun.com/) (ambulance dispatch, pre-launch):** Architected real-time dispatch (**NestJS**, Redis geospatial search, **Socket.IO**, atomic **Lua**, BullMQ) and shipped the React Native rider and driver apps plus Next.js dashboards.",
           ],
@@ -93,15 +100,23 @@ export const RESUME = {
     },
   ] satisfies ResumeJob[],
   projects: [
-    "**[Retro](https://www.ansh.life/projects/retro/)** ([retro.ansh.life](https://retro.ansh.life), [source](https://github.com/devhimanshuhc/retro)): Actor-based multi-agent research system. Agents run as isolated BullMQ workers and write cited reports. A crashed step resumes effectively once, without a duplicate report; failed jobs go to a dead-letter queue and replay.",
+    "**[Retro](https://www.ansh.life/projects/retro/)** ([retro.ansh.life](https://retro.ansh.life), [github.com/devhimanshuhc/retro](https://github.com/devhimanshuhc/retro)): Actor-based multi-agent research system on the Anthropic (Claude) and OpenAI APIs. Isolated BullMQ worker agents write cited reports; raised hand-checked facts found in a real earnings report from **48% to 86%**. Crashed workers resume from checkpoints without duplicate reports; failed jobs go to a replayable dead-letter queue.",
     "**[Quotient](https://www.ansh.life/projects/quotient/)** ([quotient-dun.vercel.app](https://quotient-dun.vercel.app)): Writing workspace with fast capture and notebooks (Next.js, Prisma, Neon).",
-    "**[DataSays](https://www.ansh.life/projects/datasays/)**: Plain-English questions return SQL and a chart. LLM analysis layer for querying and visualizing datasets.",
+    "**[DataSays](https://www.ansh.life/projects/datasays/)**: Plain-English questions return SQL and a chart. Hybrid retrieval over **pgvector** and Postgres full text, orchestrated with LangGraph.",
   ],
   skills: [
-    { label: "AI", items: "LLMs, RAG, vector search, LangChain, tool calling, structured outputs, guardrails, OpenAI, Gemini, Vercel AI SDK, Groq, Claude Code, LLM evals (LLM-as-judge)" },
+    { label: "AI", items: "Generative AI (GenAI), LLMs, RAG, prompt engineering, vector search (pgvector), LangChain, LangGraph, tool calling, structured outputs, guardrails, OpenAI, Anthropic (Claude) API, Gemini, Vercel AI SDK, Groq, Claude Code, LLM evals (LLM-as-judge)" },
     { label: "Languages", items: "TypeScript, JavaScript, Python, SQL, Lua, Solidity" },
-    { label: "Backend", items: "FastAPI, NestJS, Node.js, MongoDB, PostgreSQL, Prisma, Redis, BullMQ, Docker, AWS (S3, ECS, ECR, ElastiCache, ALB), GitHub Actions, WebSockets, Playwright, pytest" },
+    { label: "Backend", items: "REST APIs, microservices, system design, FastAPI, NestJS, Node.js, MongoDB, PostgreSQL, Prisma, Redis, BullMQ, Docker, AWS (S3, ECS, ECR, ElastiCache, ALB), CI/CD (GitHub Actions), WebSockets, Playwright, pytest" },
     { label: "Mobile & Frontend", items: "React Native (Expo), React, Next.js, TailwindCSS, TanStack Query" },
+  ],
+  education: [
+    {
+      school: "St. Vincent Pallotti College of Engineering and Technology",
+      location: "Nagpur, India",
+      degree: "B.Tech, Computer Science and Engineering",
+      dates: "2022 – May 2026",
+    },
   ],
 }
 

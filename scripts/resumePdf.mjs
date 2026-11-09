@@ -1,4 +1,4 @@
-// Prints /resume to public/resume.pdf with headless Chrome, so the download
+// Prints /resume to public/Himanshu_Chauhan_AI_Engineer.pdf with headless Chrome, so the download
 // always matches the page. Needs a running server: `pnpm dev` (or preview).
 // usage: pnpm resume:pdf [base-url]   (CHROME_PATH overrides the browser)
 import { existsSync } from "node:fs"
@@ -17,6 +17,9 @@ const browser = await chromium.launch({ executablePath })
 const page = await browser.newPage()
 await page.goto(`${base}/resume/`, { waitUntil: "networkidle" })
 await page.emulateMedia({ media: "print" })
-await page.pdf({ path: "public/resume.pdf", format: "A4", printBackground: true, preferCSSPageSize: true })
+// the pdf's Title metadata; some ATS show it to recruiters
+await page.evaluate(() => (document.title = "Himanshu Chauhan, AI Engineer"))
+const out = "public/Himanshu_Chauhan_AI_Engineer.pdf"
+await page.pdf({ path: out, format: "A4", printBackground: true, preferCSSPageSize: true })
 await browser.close()
-console.log("wrote public/resume.pdf")
+console.log(`wrote ${out}`)

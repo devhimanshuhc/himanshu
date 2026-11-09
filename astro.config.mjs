@@ -33,6 +33,7 @@ export default defineConfig({
     "/cv": "/resume/",
     "/pf": "/me",
     // old resume url, kept so previously shared links still resolve
-    "/resume-hc.pdf": "/resume.pdf"
+    "/resume-hc.pdf": "/Himanshu_Chauhan_AI_Engineer.pdf",
+    "/resume.pdf": "/Himanshu_Chauhan_AI_Engineer.pdf"
   }
 });
