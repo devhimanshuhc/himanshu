@@ -7,8 +7,11 @@ import mdx from '@astrojs/mdx';
 
 import vercel from '@astrojs/vercel';
 
+import sitemap from '@astrojs/sitemap';
+
 // https://astro.build/config
 export default defineConfig({
+  site: "https://www.ansh.life",
   // inline the (small, ~11 KB gzipped) stylesheet: saves a render-blocking round trip
   build: {
     inlineStylesheets: "always",
@@ -20,7 +23,12 @@ export default defineConfig({
   markdown: {
     shikiConfig: { theme: 'github-light' },
   },
-  integrations: [react(), mdx()],
+  integrations: [
+    react(),
+    mdx(),
+    // leftover astro starter page; keep it out of search
+    sitemap({ filter: (page) => !page.includes("/markdown-page") }),
+  ],
   adapter: vercel(),
   redirects: {
     "/cv": "/resume/",
