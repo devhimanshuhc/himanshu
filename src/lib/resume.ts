@@ -33,7 +33,7 @@ export const RESUME = {
     { label: "github.com/himanshu-dev-codes", href: "https://github.com/himanshu-dev-codes" },
     { label: "linkedin.com/in/devhimanshuhc", href: "https://linkedin.com/in/devhimanshuhc" },
   ] satisfies ResumeContact[],
-  location: "Dehradun, India · Open to relocation (Malaysia)",
+  location: "Dehradun, India · Open to relocation (India & Malaysia)",
   summary:
     "Software engineer with 2+ years of experience, including 1.5+ years shipping production **Generative AI** and LLM features: retrieval-augmented generation over clinical records, tool-calling agents for equity workflows, and an agentic mobile browser. Python, FastAPI, LangChain, Vercel AI SDK, REST APIs and microservices. Builds with **Claude Code**.",
   experience: [
