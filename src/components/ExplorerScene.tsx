@@ -14,6 +14,7 @@ const smooth = (t: number) => t * t * (3 - 2 * t)
 
 // where each sculpture sits in the world, and the angle the camera frames it from
 const SPOTS: { pos: [number, number, number]; yaw: number }[] = [
+  { pos: [-4.4, 0, -4.2], yaw: -0.25 },
   { pos: [-3.4, 0, -0.6], yaw: -0.35 },
   { pos: [-0.6, 0, -3.6], yaw: 0.15 },
   { pos: [2.9, 0, -1.4], yaw: -0.1 },

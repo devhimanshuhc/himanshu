@@ -167,12 +167,24 @@ export const CONTENT = {
     { value: 100, suffix: "k+", label: "weekly users on apps i've tuned" },
   ],
   socials: [
-    { label: "github", href: "https://github.com/himanshu-dev-codes" },
+    { label: "github", href: "https://github.com/devhimanshuhc" },
     { label: "linkedin", href: "https://linkedin.com/in/devhimanshuhc" },
     { label: "email", href: "mailto:himanshu.chauhan07@icloud.com" },
     { label: "resumé", href: "/resume/" },
   ],
   projects: [
+    {
+      key: "solo",
+      label: "Solo Harness",
+      description:
+        "A from-scratch agent harness that works in your own browser and Mac apps. It asks before anything that matters, refuses payment buttons in code, fans work out to parallel sub-agents and logs every step for replay.",
+      image: "/projects/solo.webp",
+      category: "AI agents",
+      tech: ["TypeScript", "Claude Agent SDK", "Playwright", "Swift"],
+      link: "#",
+      github: "https://github.com/devhimanshuhc/solo-harness",
+      featured: true,
+    },
     {
       key: "retro",
       label: "Retro",

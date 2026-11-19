@@ -1,0 +1,95 @@
+---
+title: "Solo Harness"
+tagline: "One agent for your browser and your Mac"
+summary: "Ask it to book a flight, send a message or research something and it works in the background, in your own logged-in browser and your own Mac apps. It asks before anything that matters and stops before money moves. Built from scratch in TypeScript; everything runs on your machine."
+kicker: "Open source"
+role: "Solo builder"
+timeline: "2026"
+stack: ["TypeScript", "Node.js 22", "Claude Agent SDK", "Anthropic API", "OpenAI-compatible APIs", "Playwright", "Chrome extension", "Swift", "Next.js 16", "OpenTelemetry", "Zod", "Vitest"]
+links:
+  source: "https://github.com/devhimanshuhc/solo-harness"
+order: 0
+tldr:
+  problem: "Agents that act for you either take over your screen, run in a fresh browser where you aren't logged in, or click whatever a web page tells them to, including Pay. And when something goes wrong there's no record of what the model actually saw."
+  built: "A harness written from scratch around one loop and one append-only log. It drives your own Chrome or Comet tabs through a paired extension, your Mac apps through AppleScript and the accessibility API, and hands parallel work to scoped sub-agents. It runs on your Claude Code login, so there's no API key to manage."
+  outcome: "On a live flight site it searched, picked the cheapest flight, filled passenger details and stopped at payment. Background clicks take about 60 ms while your tab stays in front, and 192 offline tests cover the loop, the tools and the safety rules."
+stats:
+  - { value: "192", label: "offline tests in 18 suites, no API key or network needed" }
+  - { value: "60 ms", label: "per click in a background tab, while your own tab stays in front" }
+  - { value: "0", label: "commands run by an impostor program on the extension's port" }
+  - { value: "126 ms", label: "to read Spotify's player state through AppleScript" }
+architecture:
+  - { name: "Dashboard and CLI", desc: "A Next.js 16 dashboard and a terminal chat over a local API on 127.0.0.1. Both show live tool calls, approval prompts, sessions and a trace view." }
+  - { name: "Agent loop", desc: "Sends the conversation to the model, runs the tools it asks for in parallel and sends the results back, until it answers without tools or hits the step cap." }
+  - { name: "Model adapters", desc: "One interface over Claude Code (the default, through the Agent SDK and your login), the Anthropic API and any OpenAI-compatible API such as DeepSeek or Ollama." }
+  - { name: "Session log", desc: "Append-only JSONL. It's the only source of what the model saw, so history, permissions, the dashboard, traces and cost are all built from it, and any run can be replayed." }
+  - { name: "Tool registry", desc: "Every tool has a Zod schema. Input is validated before it runs, output is truncated, and each tool has its own timeout." }
+  - { name: "Browser", desc: "Twelve browser tools on accessibility snapshots with element refs. They drive the agent's own Chromium, or your everyday browser through the Solo Bridge extension." }
+  - { name: "Mac apps", desc: "AppleScript for apps that have it, and a small Swift helper over the accessibility API (numbered buttons and fields) for every other app." }
+  - { name: "Sub-agents", desc: "spawn_agent runs independent parts of a task at once, each with its own linked log and only the tools it needs. Research and critic modes are built on it." }
+  - { name: "Memory", desc: "Typed facts about you, kept small and updated in place, plus BM25 search over past conversations. Nothing is saved without your OK." }
+decisions:
+  - title: "The log is the only source of truth"
+    problem: "When an agent does something odd, you need to know exactly what it saw. State spread across memory, the UI and the model call makes that impossible."
+    decision: "Every model message and tool result is appended to one log, and the history sent to the model is projected from it. Permissions, taint, traces and cost are all read from the same log."
+  - title: "Payments are refused in code, not in the prompt"
+    problem: "A page can tell the model to press Pay, and a system prompt is only a request."
+    decision: "Payment, password and OTP fields and final-commit buttons are refused before the action runs, including Enter or Space that would trigger them. The agent has to hand off, and OTPs go from your masked dialog straight to the page, never through the model."
+  - title: "Rules tighten after untrusted content"
+    problem: "Once the agent reads a web page or a message, its next actions may be steered by whoever wrote that page."
+    decision: "The log marks a session as tainted. From then on each new site asks first, and earlier session-wide approvals for shell commands stop applying."
+  - title: "Your own browser, paired, in the background"
+    problem: "A fresh browser means signing in everywhere and fighting bot checks, while driving your real browser can mean stealing your screen or your tabs."
+    decision: "The Solo Bridge extension pairs with a mutual HMAC challenge and only accepts its own extension origin. Agent tabs open in a background tab group, you can exclude tabs or share them one by one, and your tabs are never closed."
+  - title: "No API key"
+    problem: "Asking people to create and pay for an API key is the biggest hurdle for a personal agent."
+    decision: "The default adapter runs each model step on the user's own Claude Code login through the Agent SDK. The Anthropic API and OpenAI-compatible providers are still one setting away."
+---
+
+## Context
+
+Solo is an agent harness I built alone, from scratch, to learn how agent systems work by building every part of one: the loop, the tools, the permissions, the memory, sub-agents and tracing. It became something I use. You type an errand in plain words, like "text Mom I'm running late, play xe3, and book the cheapest flight to Goa on Friday", and it does the work in the background while you keep using your computer.
+
+It runs on your own machine. `pnpm start` installs what it needs the first time and opens the dashboard on localhost. Each model step runs on your Claude Code login, so there's no API key to set up.
+
+It's TypeScript (ESM, strict) end to end, with a Next.js 16 dashboard, a Chrome extension and a small Swift helper for Mac accessibility.
+
+## What's in it
+
+### Your own browser
+
+By default the agent works in its own Chromium window. With the Solo Bridge extension it works in your everyday Chrome, Comet, Brave, Arc or Edge instead, logged in as you. It can find a tab you already have open ("reply in my Gmail tab", "play the video I paused") and opens its own tabs in a background tab group, so your tab stays in front.
+
+You decide what it sees. Exclude a tab and the agent never knows it exists, or switch to "only tabs I share". Nothing connects without the pairing code.
+
+### Your Mac apps
+
+Spotify, Notes, Mail, WhatsApp and the rest. Apps with AppleScript get AppleScript, kept inside that one app. Everything else goes through the accessibility API: the Swift helper lists numbered buttons and fields, and the agent acts on a number after the role is checked again. Terminals, password managers, System Settings and browsers are off limits.
+
+### You approve what matters
+
+Every action asks once per site or app, with "allow once", "for this session" or "always". After the agent reads a web page or a message, the rules tighten. Payment fields and Pay buttons are refused in code, and the agent asks you before anything that speaks or commits for you.
+
+### Sub-agents, research and critic
+
+`spawn_agent` hands independent parts of a task, like three booking sites or five questions, to sub-agents that run at once, up to four at a time, each with only the tools it needs. Research mode turns the main agent into an orchestrator that splits the question and writes the synthesis. Critic mode has an independent reviewer check each answer and send it back for up to two revisions.
+
+### Every step on record
+
+The trace view shows every turn, model step, tool call, sub-agent, token and dollar. `pnpm trace` prints the same tree in the terminal, and runs export to OpenTelemetry with the GenAI conventions, so they open in Jaeger, Grafana Tempo or Langfuse.
+
+## Constraints
+
+- Everything listens on 127.0.0.1, and the local API rejects writes from other origins.
+- The model's input can be written by an attacker once it reads a page, so tool output is data and every side effect goes through the permission hook.
+- Every limit is bounded: steps per turn, output size, per-tool time, sub-agent depth and concurrency, and a loop guard for repeated failing calls.
+- `run_command` is not a sandbox. It asks before each call and strips credentials from the environment, but container isolation is still on the roadmap.
+
+## Results
+
+- On blazedemo.com it searched flights, picked the cheapest, filled passenger details and stopped at payment, handing over to me.
+- Working in a background tab of a visible browser, a click took 60 ms and typing 65 ms, with my own tab staying in front.
+- A program pretending to be the harness on the extension's port got only the pairing proof: 0 commands run and 0 tabs opened.
+- Through the accessibility API it pressed 7, +, 2, = in Calculator and read back 9, at about 0.6 s per press.
+- Two sub-agents in parallel, each with one tool, finished in 2 steps and 17k input tokens.
+- What doesn't work yet: Spotify's window exposes nothing to accessibility, some apps ignore background keystrokes, and sites with strong bot protection can still block the agent's own browser. Evals (M9) are next.

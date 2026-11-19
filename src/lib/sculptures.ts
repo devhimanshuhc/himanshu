@@ -8,7 +8,7 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
  * as exporting a real building model to a point cloud, without shipping assets.
  */
 
-export type SculptureKind = "terraces" | "canopy" | "stadium" | "tower" | "pleats" | "amphitheatre"
+export type SculptureKind = "terraces" | "canopy" | "stadium" | "tower" | "pleats" | "amphitheatre" | "pillars"
 
 const merge = (parts: THREE.BufferGeometry[]) => {
   const geometry = mergeGeometries(parts.map((p) => (p.index ? p.toNonIndexed() : p)))
@@ -156,6 +156,19 @@ function amphitheatre() {
   return merge(parts)
 }
 
+// five rounded pillars in a row, the middle one rising far above the rest — one agent and its sub-agents
+function pillars() {
+  const heights = [0.8, 1.2, 2.4, 1.2, 0.8]
+  const parts: THREE.BufferGeometry[] = [slab(3, 1.3, 0, 0.04)]
+  heights.forEach((h, i) => {
+    const r = 0.18
+    const g = new THREE.CapsuleGeometry(r, h - 2 * r, 8, 24)
+    g.translate((i - 2) * 0.56, h / 2 + 0.04, 0)
+    parts.push(g)
+  })
+  return merge(parts)
+}
+
 const builders: Record<SculptureKind, () => THREE.BufferGeometry> = {
   terraces,
   canopy,
@@ -163,6 +176,7 @@ const builders: Record<SculptureKind, () => THREE.BufferGeometry> = {
   tower,
   pleats,
   amphitheatre,
+  pillars,
 }
 
 /** Sample a model's surface into `count` points, centred on the ground and scaled to ~`size` units. */
@@ -194,6 +208,7 @@ export function sampleSculpture(kind: SculptureKind, count: number, size = 2.6) 
 }
 
 export const SCULPTURE_FOR: Record<string, SculptureKind> = {
+  solo: "pillars",
   retro: "terraces",
   evra: "canopy",
   medurun: "stadium",
@@ -202,4 +217,4 @@ export const SCULPTURE_FOR: Record<string, SculptureKind> = {
   datasays: "amphitheatre",
 }
 
-export const SCULPTURE_ORDER: SculptureKind[] = ["terraces", "canopy", "stadium", "tower", "pleats", "amphitheatre"]
+export const SCULPTURE_ORDER: SculptureKind[] = ["pillars", "terraces", "canopy", "stadium", "tower", "pleats", "amphitheatre"]
