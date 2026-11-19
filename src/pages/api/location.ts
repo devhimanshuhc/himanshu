@@ -21,11 +21,14 @@ const clean = (v: unknown) => {
   return s || null
 }
 
-/** The latest place, for the hero. Cached at the edge for a few minutes; it only changes twice a day. */
+/**
+ * The latest place, for the hero. Cached at the edge for a minute so a new check-in shows
+ * up quickly; an empty answer is never cached, or it would hide the first check-in.
+ */
 export const GET: APIRoute = async () => {
-  if (!hasStore()) return json(null, 200, { "Cache-Control": "no-store" })
-  const where = await getWhereabouts()
-  return json(where, 200, { "Cache-Control": "public, max-age=60, s-maxage=600, stale-while-revalidate=3600" })
+  const where = hasStore() ? await getWhereabouts() : null
+  if (!where) return json(null, 200, { "Cache-Control": "no-store" })
+  return json(where, 200, { "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=60" })
 }
 
 /**
