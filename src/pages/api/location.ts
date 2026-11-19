@@ -28,7 +28,9 @@ const clean = (v: unknown) => {
 export const GET: APIRoute = async () => {
   const where = hasStore() ? await getWhereabouts() : null
   if (!where) return json(null, 200, { "Cache-Control": "no-store" })
-  return json(where, 200, { "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=60" })
+  // only city and country are public; drop any area stored by an older version
+  const { city, country, updatedAt } = where
+  return json({ city, country, updatedAt }, 200, { "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=60" })
 }
 
 /**
@@ -63,7 +65,8 @@ export const POST: APIRoute = async ({ request }) => {
     place = { area: clean(body.area), city, country: clean(body.country) }
   }
 
-  const where: Whereabouts = { ...place, updatedAt: new Date().toISOString() }
+  // the hero shows city and country only, so the neighbourhood is never kept
+  const where: Whereabouts = { ...place, area: null, updatedAt: new Date().toISOString() }
   await setWhereabouts(where)
   return json(where)
 }

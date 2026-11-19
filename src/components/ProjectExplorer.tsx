@@ -24,16 +24,15 @@ function useWhereabouts() {
   return where
 }
 
-/** "Himanshu is in Rajpur, Dehradun" */
+/** "Himanshu is in Dehradun, India" */
 function WhereaboutsLine({ where, className }: { where: Whereabouts | null; className?: string }) {
   if (!where) return null
-  const place = where.area ? `${where.area}, ${where.city}` : where.city
+  const place = where.country ? `${where.city}, ${where.country}` : where.city
   return (
     <p className={cn("flex items-baseline gap-2 font-mono text-[11px] text-muted-foreground", className)}>
       <span aria-hidden="true" className="mt-[0.45em] size-1.5 shrink-0 self-start rounded-full bg-brand" />
       <span>
         Himanshu is in <span className="text-foreground">{place}</span>
-        {where.country && <span className="hidden xl:inline">, {where.country}</span>}
       </span>
     </p>
   )
@@ -326,7 +325,7 @@ export function ProjectExplorer() {
                 </>
               )}
             </div>
-            <WhereaboutsLine where={where} className="mt-4 border-t border-border pt-3" />
+            <WhereaboutsLine where={where} className="mt-4" />
           </aside>
         </div>
 
