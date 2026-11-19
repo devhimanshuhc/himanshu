@@ -28,3 +28,4 @@ pnpm-debug.log*
 figures/_scripts/
 figures/**/shots/
 figures/**/*.html
+.env*

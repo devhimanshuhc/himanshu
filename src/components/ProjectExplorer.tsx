@@ -1,6 +1,7 @@
 import * as React from "react"
 
 import { CONTENT } from "@/lib/content"
+import type { Whereabouts } from "@/lib/location"
 import { clamp, createStore, pad, type Clock, type Focus, type Shared } from "@/lib/explorer"
 import { cn } from "@/lib/utils"
 
@@ -8,6 +9,35 @@ import { cn } from "@/lib/utils"
 const ExplorerScene = React.lazy(() => import("./ExplorerScene"))
 
 const RULER_CELL = 150
+
+/** my iPhone's last check-in (9 am / 9 pm), or null until there is one */
+function useWhereabouts() {
+  const [where, setWhere] = React.useState<Whereabouts | null>(null)
+  React.useEffect(() => {
+    const ctrl = new AbortController()
+    fetch("/api/location", { signal: ctrl.signal })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((w: Whereabouts | null) => w?.city && setWhere(w))
+      .catch(() => {})
+    return () => ctrl.abort()
+  }, [])
+  return where
+}
+
+/** "Himanshu is in Rajpur, Dehradun" */
+function WhereaboutsLine({ where, className }: { where: Whereabouts | null; className?: string }) {
+  if (!where) return null
+  const place = where.area ? `${where.area}, ${where.city}` : where.city
+  return (
+    <p className={cn("flex items-baseline gap-2 font-mono text-[11px] text-muted-foreground", className)}>
+      <span aria-hidden="true" className="mt-[0.45em] size-1.5 shrink-0 self-start rounded-full bg-brand" />
+      <span>
+        Himanshu is in <span className="text-foreground">{place}</span>
+        {where.country && <span className="hidden xl:inline">, {where.country}</span>}
+      </span>
+    </p>
+  )
+}
 
 export function ProjectExplorer() {
   const projects = CONTENT.projects
@@ -33,6 +63,7 @@ export function ProjectExplorer() {
   }, [])
   const [ready, setReady] = React.useState(false)
   const [mobile, setMobile] = React.useState(false)
+  const where = useWhereabouts()
 
   // per-sculpture focus: 1 when the camera is on it, falling to 0 a stage away
   const focuses = React.useMemo<Focus[]>(
@@ -272,7 +303,7 @@ export function ProjectExplorer() {
                 <>
                   <p className="text-pretty text-[13px] leading-[1.55]">
                     AI engineer and full stack developer based in Dehradun, India. I ship LLMs, RAG and
-                    agents to production — and the web and mobile apps on top. Six of them live in this little world.
+                    agents to production — and the web and mobile apps on top. {projects.length} of them live in this little world.
                   </p>
                   <p className="text-[12px] text-body">Scroll to fly through, or pick one.</p>
                   <ol className="border-t border-border">
@@ -295,12 +326,14 @@ export function ProjectExplorer() {
                 </>
               )}
             </div>
+            <WhereaboutsLine where={where} className="mt-4 border-t border-border pt-3" />
           </aside>
         </div>
 
         <p key={`m-${active}`} className={cn("mt-3 line-clamp-2 text-[13px] leading-snug text-body lg:hidden", moved && "panel-in")}>
           {current ? current.description : "AI engineer · full stack. Scroll to fly through the work."}
         </p>
+        <WhereaboutsLine where={where} className="mt-2 lg:hidden" />
       </div>
     </section>
   )
