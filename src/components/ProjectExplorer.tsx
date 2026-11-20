@@ -200,6 +200,7 @@ export function ProjectExplorer() {
     <section
       ref={section}
       data-explorer
+      data-track="hero"
       aria-label="selected work"
       className="relative"
       style={{ height: `calc(100svh + ${stages} * 80svh)` }}

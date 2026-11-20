@@ -35,6 +35,7 @@ const year = new Date().getFullYear()
               href={s.href}
               target={s.href.startsWith("http") ? "_blank" : undefined}
               rel={s.href.startsWith("http") ? "noopener noreferrer" : undefined}
+              data-umami-event={`contact-${s.label}`}
               class="text-muted-foreground transition-colors hover:text-foreground"
             >
               {s.label}

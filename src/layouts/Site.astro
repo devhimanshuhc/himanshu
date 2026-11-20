@@ -10,6 +10,11 @@ interface Props {
   description?: string
 }
 
+// Umami (open-source, cookie-free analytics). Off until PUBLIC_UMAMI_WEBSITE_ID is set;
+// PUBLIC_UMAMI_SRC points at a self-hosted instance instead of Umami Cloud.
+const umamiId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID
+const umamiSrc = import.meta.env.PUBLIC_UMAMI_SRC ?? "https://cloud.umami.is/script.js"
+
 const {
   title,
   description = "himanshu chauhan (ansh) — ai engineer and full stack developer shipping llms, rag and agents to production, plus the web and mobile apps on top.",
@@ -42,6 +47,8 @@ const {
         if (!window.__motionReady) document.documentElement.classList.remove("js")
       }, 4000)
     </script>
+    {/* data-domains: count only the live site, never localhost or preview deploys */}
+    {umamiId && <script is:inline defer src={umamiSrc} data-website-id={umamiId} data-domains="www.ansh.life,ansh.life" />}
   </head>
 
   <body class="overflow-x-clip">
@@ -61,6 +68,8 @@ const {
 
     <script>
       import "@/scripts/motion"
+      import { trackSections } from "@/scripts/sectionTime"
+      trackSections()
     </script>
   </body>
 </html>
