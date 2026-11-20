@@ -24,10 +24,10 @@ function useWhereabouts() {
   return where
 }
 
-/** "Himanshu is in Dehradun, India" */
+/** "Himanshu is in Rajpur, Dehradun, India" */
 function WhereaboutsLine({ where, className }: { where: Whereabouts | null; className?: string }) {
   if (!where) return null
-  const place = where.country ? `${where.city}, ${where.country}` : where.city
+  const place = [where.area, where.city, where.country].filter(Boolean).join(", ")
   return (
     <p className={cn("flex items-baseline gap-2 font-mono text-[11px] text-muted-foreground", className)}>
       <span aria-hidden="true" className="mt-[0.45em] size-1.5 shrink-0 self-start rounded-full bg-brand" />
